@@ -1,10 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "routes": [
-    { "src": "/", "dest": "/chronovault-landing.html" },
-    { "src": "/panel", "dest": "/chronovault-user-panel.html" },
-    { "src": "/arsiv", "dest": "/chronovault-arsiv-ui.html" },
-    { "src": "/verify", "dest": "/chronovault-image-verify.html" }
+    { "src": "/", "dest": "/turkdamga-landing.html" },
+    { "src": "/panel", "dest": "/turkdamga-user-panel.html" },
+    { "src": "/arsiv", "dest": "/turkdamga-arsiv-ui.html" },
+    { "src": "/verify", "dest": "/turkdamga-image-verify.html" }
   ],
   "headers": [
     {
