@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TurkDamga — Blockchain Zaman Damgası</title>
+<link rel="stylesheet" href="turkdamga-shared.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  .tabs-bar {
+    position: sticky;
+    top: 64px;
+    z-index: 100;
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .tabs-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: flex-end;
+    min-height: 48px;
+    padding: 6px 0;
+  }
+  .nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nav-btn {
+    background: none; border: none; color: var(--text3);
+    font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 8px 16px; cursor: pointer;
+    border-radius: 6px; transition: all 0.2s;
+    text-decoration: none;
+  }
+  .nav-btn:hover, .nav-btn.active { color: var(--green); background: var(--green-pale); }
+  .nav-btn.active { box-shadow: inset 0 -2px 0 var(--green); }
+
+  /* ── Tabs ── */
+  .tab { display: none; }
+  .tab.active { display: block; }
+
+  /* ── Hero section ── */
+  .hero {
+    padding: 48px 0 40px;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--green2); margin-bottom: 14px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--border2);
+  }
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(2rem, 4.5vw, 3.1rem);
+    font-weight: 400; line-height: 1.12;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  h1 em { color: var(--green); font-style: italic; }
+  .hero-sub {
+    color: var(--text3); font-size: 0.95rem;
+    max-width: 520px; margin: 0 auto 32px;
+    line-height: 1.65;
+  }
+  .chain-badges {
+    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+  }
+  .badge {
+    border: 1px solid var(--border);
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 0.72rem; font-weight: 500;
+    color: var(--text2);
+    background: var(--off-white);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green-light); box-shadow: 0 0 8px rgba(46,157,90,0.45); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+
+  /* ── Drop Zone ── */
+  .drop-section { margin-bottom: 48px; }
+  .section-label {
+    font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--green2); margin-bottom: 14px; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .drop-zone {
+    border: 2px dashed var(--border2);
+    border-radius: 12px;
+    padding: 52px 28px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    background: var(--white);
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--green);
+    background: var(--green-pale);
+    box-shadow: 0 0 0 1px rgba(26,107,60,0.08);
+  }
+  .drop-icon {
+    font-size: 2.4rem; margin-bottom: 14px;
+    filter: drop-shadow(0 2px 6px rgba(26,107,60,0.15));
+  }
+  .drop-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.35rem; font-weight: 400; color: var(--text);
+    margin-bottom: 8px;
+  }
+  .drop-sub { font-size: 0.84rem; color: var(--text3); margin-bottom: 18px; }
+  .drop-toolbar {
+    text-align: left;
+    margin-bottom: 18px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed var(--border2);
+  }
+  .drop-toolbar label {
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--green2);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .drop-toolbar select {
+    width: 100%;
+    max-width: 100%;
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    padding: 10px 12px;
+    border-radius: 8px;
+    outline: none;
+    cursor: pointer;
+  }
+  .drop-toolbar select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-pale); }
+  .drop-toolbar-hint { font-size: 0.78rem; color: var(--text3); margin-top: 8px; line-height: 1.5; }
+  .drop-target { cursor: pointer; }
+  .drop-types {
+    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+  }
+  .type-tag {
+    font-size: 0.68rem; font-weight: 600;
+    border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px;
+    color: var(--text3); background: var(--surface);
+  }
+  #fileInput { display: none; }
+
+  /* ── File list ── */
+  .file-list { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .file-item {
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: flex; align-items: center; gap: 14px;
+    animation: slideIn 0.3s ease;
+  }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-8px)} to{opacity:1;transform:translateY(0)} }
+  .file-icon { font-size: 1.4rem; flex-shrink: 0; }
+  .file-info { flex: 1; min-width: 0; }
+  .file-name { font-size: 0.88rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .file-meta { font-size: 0.72rem; color: var(--text3); margin-top: 2px; }
+  .file-hash { font-size: 0.65rem; color: var(--green2); font-family: monospace; margin-top: 3px; word-break: break-all; }
+  .file-status { flex-shrink: 0; }
+  .status-pill {
+    font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 2px;
+  }
+  .status-hashing { background: var(--green-pale2); color: var(--green); border: 1px solid var(--border2); }
+  .status-ready { background: var(--green-pale); color: var(--green2); border: 1px solid var(--mint); }
+  .remove-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 1rem; padding: 4px; transition: color 0.2s; }
+  .remove-btn:hover { color: var(--red); }
+
+  /* ── Metadata form ── */
+  .meta-form {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(26,43,31,0.04);
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1/-1; }
+  label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); font-weight: 600; }
+  input, textarea, select {
+    background: var(--off-white); border: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+    padding: 10px 14px; border-radius: 8px; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-pale); }
+  textarea { resize: vertical; min-height: 70px; }
+  select option { background: var(--white); }
+
+  .kvkk-warn {
+    display: none;
+    margin-top: 12px;
+    padding: 14px 16px;
+    border-radius: 3px;
+    border: 1px solid rgba(192, 57, 43, 0.45);
+    background: rgba(192, 57, 43, 0.1);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    color: var(--text);
+  }
+  .kvkk-warn.visible { display: block; }
+  .kvkk-warn strong { color: var(--green2); font-weight: 600; }
+  .kvkk-hint {
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-top: 4px;
+    line-height: 1.45;
+    letter-spacing: 0.04em;
+  }
+  .hist-vertical {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    color: var(--green);
+    background: var(--green-pale);
+  }
+
+  /* ── Chain selector ── */
+  .chain-selector { display: flex; gap: 10px; margin-bottom: 24px; }
+  .chain-opt {
+    flex: 1; border: 1px solid var(--border); border-radius: 10px;
+    padding: 14px; cursor: pointer; transition: all 0.2s;
+    background: var(--white); text-align: center;
+  }
+  .chain-opt:hover { border-color: var(--green-light); }
+  .chain-opt.selected { border-color: var(--green); background: var(--green-pale); box-shadow: 0 0 0 1px rgba(26,107,60,0.12); }
+  .chain-opt .chain-name { font-size: 0.85rem; font-weight: 600; color: var(--text); margin-top: 4px; }
+  .chain-opt .chain-detail { font-size: 0.7rem; color: var(--text3); margin-top: 2px; }
+  .chain-icon { font-size: 1.5rem; }
+
+  /* ── Stamp button ── */
+  .stamp-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    border: none; border-radius: 10px;
+    color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem; font-weight: 600; letter-spacing: 0.08em;
+    padding: 16px; cursor: pointer; transition: all 0.25s;
+    position: relative; overflow: hidden;
+    box-shadow: 0 4px 14px rgba(26,107,60,0.35);
+  }
+  .stamp-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--green-light), var(--mint));
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .stamp-btn:hover::before { opacity: 1; }
+  .stamp-btn:hover { box-shadow: 0 6px 22px rgba(26,107,60,0.4); transform: translateY(-1px); }
+  .stamp-btn span { position: relative; z-index: 1; }
+  .stamp-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── Progress overlay ── */
+  .stamp-progress {
+    display: none; margin-top: 16px;
+    background: var(--off-white); border: 1px solid var(--border);
+    border-radius: 10px; padding: 20px 24px;
+  }
+  .stamp-progress.show { display: block; }
+  .progress-steps { display: flex; flex-direction: column; gap: 10px; }
+  .p-step {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.82rem; color: var(--text3); transition: color 0.3s;
+  }
+  .p-step.done { color: var(--text); }
+  .p-step.active { color: var(--green); }
+  .p-step .step-icon { width: 20px; text-align: center; font-size: 0.9rem; }
+  .p-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 16px; overflow: hidden; }
+  .p-bar-fill { height: 100%; background: linear-gradient(90deg, var(--green), var(--green-light)); border-radius: 2px; transition: width 0.5s ease; width: 0%; }
+
+  /* ── Result card ── */
+  .result-card {
+    display: none; margin-top: 20px;
+    border: 1px solid var(--border2);
+    border-radius: 12px; overflow: hidden;
+    background: var(--white);
+    box-shadow: 0 4px 24px rgba(26,43,31,0.06);
+    animation: slideIn 0.4s ease;
+  }
+  .result-card.show { display: block; }
+  .result-header {
+    background: linear-gradient(135deg, var(--green-pale), var(--off-white));
+    padding: 16px 24px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .result-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; font-weight: 400; }
+  .result-body { padding: 20px 24px; display: flex; gap: 24px; }
+  .result-details { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .detail-row { display: flex; flex-direction: column; gap: 3px; }
+  .detail-label { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green2); font-weight: 600; }
+  .detail-value { font-size: 0.8rem; color: var(--text); font-family: monospace; word-break: break-all; }
+  .detail-value a { color: var(--green); text-decoration: none; font-weight: 600; }
+  .detail-value a:hover { text-decoration: underline; }
+  .qr-area { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  #qrcode { background: white; padding: 8px; border-radius: 2px; }
+  .qr-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
+  .cert-btn {
+    background: var(--white); border: 1px solid var(--green);
+    color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem; font-weight: 600;
+    padding: 10px 18px; cursor: pointer; border-radius: 8px;
+    transition: all 0.2s; margin-top: 4px;
+  }
+  .cert-btn:hover { background: var(--green-pale); }
+  .storage-notice {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--green-pale2);
+    background: var(--green-pale);
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: var(--text2);
+  }
+  .storage-notice strong { color: var(--text); }
+  .storage-notice--muted { background: var(--off-white); border-color: var(--border); }
+  .result-dl-row { margin-top: 10px; }
+  .storage-ack {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    max-width: 640px;
+    margin-bottom: 16px;
+    font-size: 0.86rem;
+    line-height: 1.6;
+    color: var(--text2);
+  }
+  .storage-ack input { margin-top: 4px; flex-shrink: 0; }
+
+  /* ── History tab ── */
+  .history-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 8px; }
+  .history-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 10px; padding: 16px 20px;
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 16px; align-items: center;
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .history-card:hover { border-color: var(--green-light); box-shadow: 0 2px 12px rgba(26,43,31,0.06); }
+  .hist-icon { font-size: 1.8rem; }
+  .hist-name { font-size: 0.9rem; color: var(--text); margin-bottom: 4px; }
+  .hist-hash { font-size: 0.65rem; color: var(--text3); font-family: monospace; }
+  .hist-meta { font-size: 0.72rem; color: var(--text3); margin-top: 4px; }
+  .hist-chains { display: flex; gap: 6px; }
+  .hist-chain {
+    font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+    border: 1px solid var(--border); padding: 2px 8px; border-radius: 2px;
+  }
+  .hist-chain.confirmed { color: var(--green2); border-color: var(--mint); background: var(--green-pale); }
+  .hist-chain.pending { color: #a67c00; border-color: rgba(166,124,0,0.35); background: #fffbeb; }
+  .empty-state {
+    text-align: center; padding: 64px 24px;
+    color: var(--text3); font-size: 0.9rem;
+  }
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+
+  /* ── Verify tab ── */
+  .verify-box {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: 12px; padding: 32px;
+    box-shadow: 0 2px 12px rgba(26,43,31,0.04);
+    max-width: 600px; margin: 0 auto;
+  }
+  .verify-title { font-family: 'DM Serif Display', serif; font-size: 1.55rem; font-weight: 400; margin-bottom: 8px; }
+  .verify-sub { font-size: 0.85rem; color: var(--text3); margin-bottom: 16px; line-height: 1.6; }
+  .verify-hint {
+    font-size: 0.84rem;
+    color: var(--text2);
+    line-height: 1.65;
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    background: var(--green-pale);
+    border: 1px solid var(--green-pale2);
+    border-radius: 10px;
+  }
+  .verify-hint strong { color: var(--text); }
+  .verify-or { text-align: center; color: var(--text3); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; margin: 16px 0; display: flex; align-items: center; gap: 12px; }
+  .verify-or::before, .verify-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  .verify-drop {
+    border: 2px dashed var(--border2);
+    border-radius: 10px; padding: 32px;
+    background: var(--off-white);
+    text-align: center; cursor: pointer;
+    transition: all 0.2s; font-size: 0.85rem; color: var(--text3);
+  }
+  .verify-drop:hover { border-color: var(--green); color: var(--text); background: var(--green-pale); }
+  .verify-btn {
+    width: 100%; margin-top: 20px;
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    border: none;
+    color: var(--white); font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem; font-weight: 600;
+    padding: 14px; cursor: pointer; border-radius: 10px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 10px rgba(26,107,60,0.25);
+  }
+  .verify-btn:hover { filter: brightness(1.05); }
+  .verify-result {
+    display: none; margin-top: 20px;
+    border-radius: 3px; padding: 20px 24px;
+    text-align: center; animation: slideIn 0.3s ease;
+  }
+  .verify-result.show { display: block; }
+  .verify-result.found { background: var(--green-pale); border: 1px solid var(--mint); }
+  .verify-result.notfound { background: #fdecea; border: 1px solid rgba(192,57,43,0.35); }
+  .verify-icon { font-size: 2.5rem; margin-bottom: 8px; }
+  .verify-msg { font-family: 'DM Serif Display', serif; font-size: 1.25rem; font-weight: 400; }
+  .verify-detail { font-size: 0.8rem; color: var(--text3); margin-top: 8px; }
+
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .stat {
+    background: var(--white); padding: 20px 24px;
+    text-align: center;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(26,43,31,0.04);
+  }
+  .stat-num { font-family: 'DM Serif Display', serif; font-size: 2rem; color: var(--green); line-height: 1; }
+  .stat-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-top: 4px; font-weight: 600; }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 28px 24px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 0.8rem;
+    margin-top: 72px;
+    position: relative;
+    z-index: 1;
+  }
+  footer a { color: var(--green); text-decoration: none; font-weight: 600; }
+  footer a:hover { text-decoration: underline; }
+
+  @media(max-width:600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .result-body { flex-direction: column; }
+    .chain-selector { flex-direction: column; }
+    .stats-bar { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body class="cv-base cv-fixed-nav">
+
+<nav class="cv-site-nav" aria-label="Site">
+  <div class="cv-site-nav-inner">
+    <a class="cv-nav-logo" href="turkdamga-landing.html">
+      <div class="cv-logo-mark">⧗</div>
+      <div class="cv-logo-text">Chrono<span>Vault</span></div>
+    </a>
+    <div class="cv-nav-cluster">
+      <div class="cv-lang-toggle">
+        <button type="button" class="cv-lang-btn active" onclick="cvSetLang('tr',this)" aria-pressed="true">TR</button>
+        <button type="button" class="cv-lang-btn" onclick="cvSetLang('en',this)" aria-pressed="false">EN</button>
+      </div>
+      <div class="cv-nav-links">
+        <a class="cv-nav-link" href="turkdamga-landing.html#features" data-tr="Özellikler" data-en="Features">Özellikler</a>
+        <a class="cv-nav-link" href="turkdamga-landing.html#how" data-tr="Nasıl Çalışır" data-en="How It Works">Nasıl Çalışır</a>
+        <a class="cv-nav-link" href="turkdamga-landing.html#pricing" data-tr="Fiyatlar" data-en="Pricing">Fiyatlar</a>
+        <a class="cv-nav-link" href="#" data-tr="API Docs" data-en="API Docs">API Docs</a>
+        <a class="cv-nav-link is-current" href="turkdamga-arsiv-ui.html" data-tr="Arşiv" data-en="Archive">Arşiv</a>
+        <a class="cv-nav-link" href="turkdamga-image-verify.html" data-tr="Görsel" data-en="Visual">Görsel</a>
+        <a class="cv-nav-link" href="turkdamga-user-panel.html" data-tr="Panel" data-en="Dashboard">Panel</a>
+      </div>
+      <div class="cv-nav-divider" aria-hidden="true"></div>
+      <a class="cv-nav-signin" href="turkdamga-user-panel.html" data-tr="Giriş Yap" data-en="Sign In">Giriş Yap</a>
+      <a class="cv-nav-cta" href="turkdamga-arsiv-ui.html" data-tr="Ücretsiz Başla" data-en="Get Started Free">Ücretsiz Başla</a>
+    </div>
+  </div>
+</nav>
+
+<header class="tabs-bar">
+  <div class="tabs-inner">
+    <nav class="nav" aria-label="Arşiv sekmeleri">
+      <button type="button" class="nav-btn active" onclick="switchTab('stamp', this)">Damgala</button>
+      <button type="button" class="nav-btn" onclick="switchTab('history', this)">Geçmiş</button>
+      <button type="button" class="nav-btn" onclick="switchTab('verify', this)">Doğrula</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════════════ STAMP TAB ══════════════ -->
+  <div class="tab active" id="tab-stamp">
+    <div class="hero">
+      <div class="hero-eyebrow">Değişmez Dijital Kanıt</div>
+      <h1>Dosyalarınızı<br><em>Ebediyen</em> Damgalayın</h1>
+      <p class="hero-sub">SHA-256 hash'inizi TurkDamga blockchain ağına gömerek varlığınızı ve bütünlüğünüzü matematiksel olarak kanıtlayın.</p>
+      <div class="chain-badges">
+        <div class="badge"><span class="dot"></span> Tek zincir — tutarlı kanıt</div>
+        <div class="badge"><span class="dot"></span> Anında işlem kaydı</div>
+        <div class="badge"><span class="dot"></span> RFC 3161 uyumlu</div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">Toplam Damgalama</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-chain">0</div>
+        <div class="stat-label">Zincirde onaylı</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-pending">0</div>
+        <div class="stat-label">Doğrulama bekleyen</div>
+      </div>
+    </div>
+
+    <!-- Drop Zone -->
+    <div class="drop-section">
+      <div class="section-label">Dosya ve ürün türü</div>
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-toolbar" onclick="event.stopPropagation()">
+          <label for="metaVertical">Damgalanacak ürün / proje kategorisi</label>
+          <select id="metaVertical" onchange="updateKvkkWarnings()">
+            <option value="">— Genel dosya / belge —</option>
+            <option value="architecture">Mimari veya inşaat projesi (CAD, BIM, PDF, paket)</option>
+            <option value="music">Müzik / ses eseri</option>
+            <option value="visual">Görsel / medya (render, plaka, fotoğraf)</option>
+            <option value="health_archive">Hasta arşivi / hastane adli dosya (sağlık verisi)</option>
+            <option value="municipal_license">Belediye belge / ruhsat</option>
+            <option value="other">Yazılım veya program çıktısı / diğer</option>
+          </select>
+          <p class="drop-toolbar-hint">Seçim KVKK dikeyi ve sertifikada kullanılır. Mimari ve inşaat: DWG, DXF, IFC, RVT dışa aktarımı, proje ZIP’i; program: CSV, JSON, log, rapor, derleme çıktıları vb. Aşağıya dosyayı sürükleyin veya tıklayın.</p>
+        </div>
+        <div class="drop-target" onclick="document.getElementById('fileInput').click()">
+          <div class="drop-icon">⧉</div>
+          <div class="drop-title">Dosyaları buraya sürükleyin</div>
+          <div class="drop-sub">veya bu alana tıklayarak seçin</div>
+          <div class="drop-types">
+            <span class="type-tag">PDF</span>
+            <span class="type-tag">DWG / DXF</span>
+            <span class="type-tag">IFC / RVT</span>
+            <span class="type-tag">ZIP / 7z</span>
+            <span class="type-tag">JPG / PNG</span>
+            <span class="type-tag">MP4 / MOV</span>
+            <span class="type-tag">MP3 / WAV</span>
+            <span class="type-tag">XLSX / CSV</span>
+            <span class="type-tag">Kod &amp; JSON</span>
+            <span class="type-tag">Tümü</span>
+          </div>
+        </div>
+      </div>
+      <input type="file" id="fileInput" multiple>
+      <div class="file-list" id="fileList"></div>
+    </div>
+
+    <!-- Metadata -->
+    <div class="section-label">Metadata</div>
+    <div class="meta-form">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Yazar / Sahip</label>
+          <input type="text" id="metaAuthor" placeholder="Ad Soyad veya kurum">
+        </div>
+        <div class="form-group">
+          <label>Proje / Kategori</label>
+          <input type="text" id="metaProject" placeholder="Proje adı">
+        </div>
+        <div class="form-group full">
+          <label>Açıklama</label>
+          <textarea id="metaDesc" placeholder="Bu dosyanın içeriği veya amacı hakkında kısa not..."></textarea>
+        </div>
+        <p class="kvkk-hint" style="grid-column:1/-1;margin-top:-4px;margin-bottom:4px">
+          Ürün / proje kategorisi yukarıdaki sürükle-bırak kutusunda seçilir. API: <code style="color:var(--green);">vertical</code>. Ayrıntı: docs/KVKK-Vertical-Damgalama.md
+        </p>
+        <div class="form-group full">
+          <label>Eser / ürün adı (sertifikada, isteğe bağlı)</label>
+          <input type="text" id="metaWorkTitle" maxlength="300" placeholder="Parça, yayın, video başlığı veya ürün adı — müzik / video / tasarım için önerilir">
+          <p class="kvkk-hint">Belge dışı medya damgalarında sertifikada gösterilir. API: <code style="color:var(--green);">work_title</code>. Ayrıntı: docs/Medya-Damga-Sertifikasi.md</p>
+        </div>
+        <div class="form-group">
+          <label>İşleme amacı (kısa)</label>
+          <input type="text" id="metaPurpose" maxlength="120" placeholder="Örn. bütünlük kanıtı, ruhsat arşivi">
+        </div>
+        <div class="form-group">
+          <label>Veri sınıfı</label>
+          <select id="metaDataCategory" onchange="updateKvkkWarnings()">
+            <option value="general">Genel / teknik veri</option>
+            <option value="personal">Kişisel veri içerebilir</option>
+            <option value="special_health">Özel nitelikli sağlık verisi (m.6)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Saklama süresi sonu (isteğe bağlı)</label>
+          <input type="date" id="metaRetention" title="Politikanızdaki saklama üst sınırı">
+        </div>
+        <div class="form-group full">
+          <label>Rıza / sözleşme referansı (hasta arşivi için zorunlu)</label>
+          <input type="text" id="metaConsentRef" maxlength="120" placeholder="İç kayıt no, sözleşme veya rıza formu referansı">
+        </div>
+        <div id="kvkkHealthWarn" class="kvkk-warn">
+          <strong>Hastane / sağlık arşivi ve adli dosyalar:</strong> Arşiv damgalaması (hash ve zincir kanıtı) <strong>asıl tıbbi veya idari evrakın saklanması yerine geçmez</strong>. Hukuk ve mevzuatın öngördüğü sürelerde orijinal veya hukuken eşdeğer nüshanın muhafazası tamamen kurumunuzun yükümlülüğündedir; bu sınır <strong>KVKK işleme envanteri</strong> ve <strong>hizmet / iş ortaklığı sözleşmelerinde açıkça yazılmalıdır</strong> (ör. <code style="color:var(--green);">docs/KVKK-Vertical-Damgalama.md</code> §2.4.1).
+          <div id="kvkkHealthM6Extra" style="display:none;margin-top:12px;padding-top:12px;border-top:1px dashed rgba(26,43,31,0.2)">
+            <strong>Özel nitelikli sağlık verisi (KVKK m.6):</strong> Açık rıza veya kanunda öngörülen şartlar, aydınlatma metni, teknik ve idari tedbirler ve VERBİS süreçleri zorunludur. Damgalama tek başına hukuki uyum sağlamaz;
+            <strong>rıza / sözleşme referansı</strong> alanını doldurmadan devam etmeyin. Üretimde API: <code style="color:var(--green);">POST /stamps</code> ile aynı kurallar geçerlidir.
+          </div>
+        </div>
+        <div id="kvkkMunicipalWarn" class="kvkk-warn" style="border-color:rgba(26,107,60,0.4);background:var(--green-pale);">
+          <strong>Belediye belge / ruhsat:</strong> Başvuru dosyalarında kişisel veri işlenir. İşleme amacını sınırlayın; yalnızca gerekli metadata saklayın.
+          Kamu/idari meşruiyet ve saklama sürelerine uygun retention tarihi kullanın.
+        </div>
+      </div>
+    </div>
+
+    <div class="section-label">Blockchain</div>
+    <p style="color:var(--text3);font-size:0.9rem;line-height:1.65;max-width:640px;margin-bottom:12px">
+      Tüm damgalamalar tek bir TurkDamga blockchain katmanında işlenir; ek zincir veya ağ seçimi gerekmez.
+    </p>
+    <label class="storage-ack">
+      <input type="checkbox" id="metaStorageAck">
+      <span>Orijinal dosyanın (belge, görsel, arşiv vb.) <strong>kendi bilgisayarımda veya seçtiğim sunucularımda saklanmasından ben sorumluyum</strong>. TurkDamga ayrı bir barındırma sözleşmesi olmadıkça bu dosyayı kalıcı müşteri deposu olarak tutmayacağını; <strong>hizmet / abonelik sözleşmemde bu saklama koşullarının bana ait olduğunun</strong> yer aldığını bilerek damgalıyorum. (Örnek madde: <code style="color:var(--green);font-size:0.8rem">docs/Kullanici-Saklama-Yukumlulugu.md</code>)</span>
+    </label>
+    <label class="storage-ack" style="margin-top:10px;border-color:rgba(26,107,60,0.25);">
+      <input type="checkbox" id="apiStampMode">
+      <span><strong>Gerçek API:</strong> Tarayıcıda <code style="font-size:0.8rem">cv_api_base</code> ve <code style="font-size:0.8rem">cv_access_token</code> kayıtlıysa (Kullanıcı paneli → Hesap) <code>POST /stamps</code> çağrılır; ilk dosyanın hash’i gönderilir. İşaretli değilse yalnızca yerel demo simülasyonu çalışır.</span>
+    </label>
+
+    <button class="stamp-btn" id="stampBtn" onclick="startStamp()">
+      <span>⧗ &nbsp; Blockchain'e Damgala</span>
+    </button>
+
+    <!-- Progress -->
+    <div class="stamp-progress" id="stampProgress">
+      <div class="progress-steps" id="progressSteps">
+        <div class="p-step active" id="step1"><span class="step-icon">◎</span> Dosya hash'i hesaplanıyor…</div>
+        <div class="p-step" id="step2"><span class="step-icon">◎</span> Blockchain'e yazılıyor…</div>
+        <div class="p-step" id="step3"><span class="step-icon">◎</span> Kalıcı zaman damgası alınıyor…</div>
+        <div class="p-step" id="step4"><span class="step-icon">◎</span> Sertifika oluşturuluyor…</div>
+      </div>
+      <div class="p-bar"><div class="p-bar-fill" id="pBarFill"></div></div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <span style="font-size:1.4rem">✦</span>
+        <div class="result-title" id="resultTitleMain">Damgalama Başarılı — Sertifikanız Hazır</div>
+      </div>
+      <div class="result-body">
+        <div class="result-details" id="resultDetails"></div>
+        <div class="qr-area">
+          <div id="qrcode"></div>
+          <div class="qr-label">Doğrulama QR</div>
+          <button class="cert-btn" onclick="downloadCert()">⬇ Sertifika İndir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ HISTORY TAB ══════════════ -->
+  <div class="tab" id="tab-history">
+    <div style="padding: 40px 0 24px;">
+      <div class="section-label">Damgalama Geçmişi</div>
+      <div class="history-grid" id="historyGrid">
+        <div class="empty-state">
+          <div class="empty-icon">⧗</div>
+          <p>Henüz damgalama yapılmadı.<br>İlk damgalamanızı gerçekleştirin.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════ VERIFY TAB ══════════════ -->
+  <div class="tab" id="tab-verify">
+    <div style="padding: 40px 0 24px; max-width: 600px; margin: 0 auto;">
+      <div class="section-label">Hash Doğrulama</div>
+      <div class="verify-box">
+        <div class="verify-title">Bütünlük Doğrulama</div>
+        <div class="verify-sub">Bir dosyanın daha önce bu arşivde damgalandığını ve değiştirilmediğini doğrulayın.</div>
+        <div class="verify-hint">
+          <strong>Ürün türü fark etmez:</strong> mimari / inşaat (DWG, DXF, IFC, RVT dışa aktarımı, proje ZIP’i),
+          yazılım veya program çıktısı (CSV, JSON, log vb.), belge veya medya — doğrulama hep aynı <strong>SHA-256</strong> özeti üzerinden yapılır.
+          Damgala sekmesinde seçtiğiniz <strong>ürün / proje kategorisi</strong> (KVKK dikeyi) burada sorulmaz; bu cihazda kayıtlı damga geçmişinde aynı hash varsa sonuç bulunur.
+        </div>
+
+        <label>SHA-256 Hash Girin</label>
+        <input type="text" id="verifyHashInput" placeholder="a3b4c5d6e7f8..." style="width:100%;margin-top:8px;font-family:monospace;font-size:0.82rem;">
+
+        <div class="verify-or">veya</div>
+
+        <div class="verify-drop" onclick="document.getElementById('verifyFileInput').click()">
+          📁 &nbsp; Dosyayı sürükleyin veya tıklayın — hash otomatik hesaplanır (tüm uzantılar)
+        </div>
+        <input type="file" id="verifyFileInput" style="display:none" onchange="hashVerifyFile(this)">
+
+        <button class="verify-btn" onclick="verifyHash()">⧗ &nbsp; Doğrula</button>
+
+        <div class="verify-result" id="verifyResult">
+          <div class="verify-icon" id="verifyIcon"></div>
+          <div class="verify-msg" id="verifyMsg"></div>
+          <div class="verify-detail" id="verifyDetail"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  TurkDamga &mdash; tek blockchain katmanı &bull; SHA-256 &bull; RFC 3161
+</footer>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+let selectedFiles = [];
+let stampHistory = JSON.parse(localStorage.getItem('cv_history') || '[]');
+let selectedChain = 'blockchain';
+let currentResult = null;
+
+// ── Tab switching ───────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'history') renderHistory();
+  if (name === 'stamp') updateStats();
+}
+
+
+const VERTICAL_LABELS = {
+  music: 'Müzik',
+  architecture: 'Mimari / inşaat',
+  visual: 'Görsel / medya',
+  health_archive: 'Hasta arşivi / hastane adli dosya',
+  municipal_license: 'Belediye / ruhsat',
+  other: 'Yazılım çıktısı / diğer'
+};
+
+function updateKvkkWarnings() {
+  const v = document.getElementById('metaVertical').value;
+  const cat = document.getElementById('metaDataCategory').value;
+  const healthEl = document.getElementById('kvkkHealthWarn');
+  const munEl = document.getElementById('kvkkMunicipalWarn');
+  healthEl.classList.toggle('visible', v === 'health_archive');
+  const healthM6 = document.getElementById('kvkkHealthM6Extra');
+  if (healthM6) {
+    healthM6.style.display = (v === 'health_archive' && cat === 'special_health') ? 'block' : 'none';
+  }
+  munEl.classList.toggle('visible', v === 'municipal_license');
+}
+
+// ── File hashing (Web Crypto API) ───────────────────────────
+async function hashFile(file) {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── Drop zone ────────────────────────────────────────────────
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('dragover');
+  addFiles(Array.from(e.dataTransfer.files));
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  addFiles(Array.from(e.target.files));
+});
+
+async function addFiles(files) {
+  for (const file of files) {
+    if (selectedFiles.find(f => f.name === file.name && f.size === file.size)) continue;
+    const entry = { file, hash: null, status: 'hashing' };
+    selectedFiles.push(entry);
+    renderFileList();
+    entry.hash = await hashFile(file);
+    entry.status = 'ready';
+    renderFileList();
+  }
+}
+
+function getFileIcon(name) {
+  const ext = name.split('.').pop().toLowerCase();
+  if (['pdf'].includes(ext)) return '📄';
+  if (['jpg','jpeg','png','gif','webp','tiff'].includes(ext)) return '🖼';
+  if (['mp4','mov','avi','mkv','webm'].includes(ext)) return '🎬';
+  if (['mp3','wav','flac','aac','ogg'].includes(ext)) return '🎵';
+  if (['py','js','ts','html','css','sol','json','xml','csv','sql'].includes(ext)) return '💾';
+  if (['dwg','dxf'].includes(ext)) return '📐';
+  if (['ifc','rvt','rfa'].includes(ext)) return '🏗';
+  if (['zip','7z','rar'].includes(ext)) return '📦';
+  if (['xlsx','xls','ods'].includes(ext)) return '📊';
+  if (['skp','3dm','obj','fbx','glb','gltf'].includes(ext)) return '🔷';
+  return '📁';
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+function renderFileList() {
+  const list = document.getElementById('fileList');
+  list.innerHTML = selectedFiles.map((e, i) => `
+    <div class="file-item">
+      <div class="file-icon">${getFileIcon(e.file.name)}</div>
+      <div class="file-info">
+        <div class="file-name">${e.file.name}</div>
+        <div class="file-meta">${formatBytes(e.file.size)} · ${e.file.type || 'bilinmeyen tip'}</div>
+        ${e.hash ? `<div class="file-hash">SHA-256: ${e.hash}</div>` : ''}
+      </div>
+      <div class="file-status">
+        <span class="status-pill ${e.status === 'hashing' ? 'status-hashing' : 'status-ready'}">
+          ${e.status === 'hashing' ? '⟳ Hash…' : '✓ Hazır'}
+        </span>
+      </div>
+      <button class="remove-btn" onclick="removeFile(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeFile(i) {
+  selectedFiles.splice(i, 1);
+  renderFileList();
+}
+
+function resetStampProgressUI() {
+  const stepIds = ['step1', 'step2', 'step3', 'step4'];
+  const defaultText = [
+    "Dosya hash'i hesaplanıyor…",
+    "Blockchain'e yazılıyor…",
+    'Kalıcı zaman damgası alınıyor…',
+    'Sertifika oluşturuluyor…',
+  ];
+  stepIds.forEach((id, i) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('done', 'active');
+    el.innerHTML = `<span class="step-icon">◎</span> ${defaultText[i]}`;
+  });
+  document.getElementById('step1').classList.add('active');
+  const bar = document.getElementById('pBarFill');
+  if (bar) bar.style.width = '0%';
+}
+
+function parseApiErrorDetail(errJson) {
+  const d = errJson && errJson.detail;
+  if (typeof d === 'string') return d;
+  if (Array.isArray(d)) return d.map((e) => (e && (e.msg || e.message)) || String(e)).join('; ');
+  if (d != null) return JSON.stringify(d);
+  return JSON.stringify(errJson);
+}
+
+// ── Simulate stamp ───────────────────────────────────────────
+async function startStamp() {
+  if (selectedFiles.length === 0) { alert('Lütfen en az bir dosya seçin.'); return; }
+  if (selectedFiles.some(f => f.status === 'hashing')) { alert('Hash hesaplanması bekleniyor…'); return; }
+
+  const vert = document.getElementById('metaVertical').value;
+  const cat = document.getElementById('metaDataCategory').value;
+  const consent = document.getElementById('metaConsentRef').value.trim();
+  if (vert === 'health_archive' && cat === 'special_health' && !consent) {
+    alert('Hasta arşivi (KVKK m.6 özel nitelikli sağlık verisi) için rıza veya sözleşme referansı zorunludur.');
+    updateKvkkWarnings();
+    return;
+  }
+  const storageAck = document.getElementById('metaStorageAck');
+  if (!storageAck || !storageAck.checked) {
+    alert('Devam etmek için saklama koşullarını (orijinal dosyanın size ait ortamlarda saklanması) onaylamanız gerekir.');
+    return;
+  }
+
+  const btn = document.getElementById('stampBtn');
+  btn.disabled = true;
+
+  const progress = document.getElementById('stampProgress');
+  const resultCard = document.getElementById('resultCard');
+  progress.classList.add('show');
+  resultCard.classList.remove('show');
+
+  const useApi = document.getElementById('apiStampMode') && document.getElementById('apiStampMode').checked;
+  const token = localStorage.getItem('cv_access_token') || '';
+  const apiBase = (localStorage.getItem('cv_api_base') || '').replace(/\/$/, '');
+
+  if (useApi) {
+    if (!token || !apiBase) {
+      alert('API modu: Kullanıcı panelinde API tabanı ve access token kaydedin (cv_api_base, cv_access_token).');
+      btn.disabled = false;
+      progress.classList.remove('show');
+      return;
+    }
+    const primaryFile = selectedFiles[0];
+    const bar = document.getElementById('pBarFill');
+    const stepIds = ['step1', 'step2', 'step3', 'step4'];
+    const s1 = document.getElementById('step1');
+    s1.classList.remove('active');
+    s1.classList.add('done');
+    s1.innerHTML = '<span class="step-icon" style="color:var(--green)">✓</span> ✓ Hash hazır';
+    document.getElementById('step2').classList.add('active');
+    if (bar) bar.style.width = '25%';
+
+    const purpose = document.getElementById('metaPurpose').value.trim();
+    const retentionVal = document.getElementById('metaRetention').value;
+    const wtitle = document.getElementById('metaWorkTitle').value.trim();
+    let retentionIso = null;
+    if (retentionVal) retentionIso = new Date(retentionVal + 'T12:00:00.000Z').toISOString();
+
+    const idem = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : ('idem-' + Date.now());
+    const payload = {
+      file_hash: primaryFile.hash,
+      file_name: primaryFile.file.name,
+      file_size: primaryFile.file.size || 0,
+      file_type: primaryFile.file.type || null,
+      author: document.getElementById('metaAuthor').value.trim() || null,
+      project: document.getElementById('metaProject').value.trim() || null,
+      description: document.getElementById('metaDesc').value.trim() || null,
+      tags: [],
+      chain: 'both',
+      idempotency_key: idem,
+    };
+    if (vert) payload.vertical = vert;
+    if (cat) payload.data_category = cat;
+    if (purpose) payload.processing_purpose = purpose;
+    if (retentionIso) payload.retention_until = retentionIso;
+    if (consent) payload.consent_reference = consent;
+    if (wtitle) payload.work_title = wtitle;
+
+    let res;
+    try {
+      res = await fetch(apiBase + '/stamps/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer ' + token,
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      resetStampProgressUI();
+      progress.classList.remove('show');
+      btn.disabled = false;
+      alert('Ağ hatası: ' + (e && e.message ? e.message : String(e)));
+      return;
+    }
+
+    if (!res.ok) {
+      let msg = res.status + ' ' + res.statusText;
+      try {
+        const errJson = await res.json();
+        msg = parseApiErrorDetail(errJson);
+      } catch (e) { /* ignore */ }
+      resetStampProgressUI();
+      progress.classList.remove('show');
+      btn.disabled = false;
+      alert('API damgalama hatası: ' + msg);
+      return;
+    }
+
+    const data = await res.json();
+    const apiMsgs = ['', '✓ API kaydı oluşturuldu', '✓ Kuyruk / zaman damgası', '✓ Sertifika bilgisi alındı'];
+    for (let i = 1; i < 4; i++) {
+      await sleep(180);
+      const el = document.getElementById(stepIds[i]);
+      el.classList.remove('active');
+      el.classList.add('done');
+      el.innerHTML = '<span class="step-icon" style="color:var(--green)">✓</span> ' + apiMsgs[i];
+      if (bar) bar.style.width = ((i + 1) / 4 * 100) + '%';
+      if (i < 3) document.getElementById(stepIds[i + 1]).classList.add('active');
+    }
+
+    const polyTx = data.polygon_tx || '';
+    const polyUrl = data.polygon_url || (polyTx ? ('https://polygonscan.com/tx/' + polyTx) : '#');
+    const result = {
+      fileName: data.file_name,
+      fileHash: data.file_hash,
+      polyTx: polyTx || '—',
+      polyUrl,
+      otsStatus: data.ots_status || 'pending',
+      timestamp: data.created_at,
+      chain: data.chain || 'both',
+      author: document.getElementById('metaAuthor').value || '—',
+      project: document.getElementById('metaProject').value || '—',
+      desc: document.getElementById('metaDesc').value || '—',
+      vertical: vert || null,
+      verticalLabel: vert ? (VERTICAL_LABELS[vert] || vert) : null,
+      processingPurpose: purpose || null,
+      dataCategory: cat,
+      retentionUntil: retentionVal || null,
+      consentReference: consent || null,
+      workTitle: wtitle || null,
+      id: String(data.id),
+    };
+    currentResult = result;
+    window._lastStampSourceEntries = selectedFiles
+      .filter(e => e.file && e.status === 'ready')
+      .map(e => e.file);
+
+    stampHistory.unshift(result);
+    if (stampHistory.length > 100) stampHistory.pop();
+    localStorage.setItem('cv_history', JSON.stringify(stampHistory));
+    updateStats();
+    showResult(result, { fromHistory: false });
+    btn.disabled = false;
+    resetStampProgressUI();
+    progress.classList.remove('show');
+    return;
+  }
+
+  const steps = ['step1','step2','step3','step4'];
+  const bar = document.getElementById('pBarFill');
+  const msgs = [
+    '✓ Hash hesaplandı',
+    '✓ Blockchain kaydı oluşturuldu',
+    '✓ Zaman damgası alındı',
+    '✓ Sertifika hazır'
+  ];
+
+  for (let i = 0; i < steps.length; i++) {
+    await sleep(800 + Math.random() * 400);
+    const el = document.getElementById(steps[i]);
+    el.classList.remove('active');
+    el.classList.add('done');
+    el.querySelector('.step-icon').textContent = '✓';
+    el.innerHTML = `<span class="step-icon" style="color:var(--green)">✓</span> ${msgs[i]}`;
+    bar.style.width = ((i+1)/steps.length*100) + '%';
+    if (i < steps.length - 1) document.getElementById(steps[i+1]).classList.add('active');
+  }
+
+  // Generate fake but realistic result
+  const now = new Date();
+  const fakeTx = '0x' + Array.from({length:64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  const explorerBase = 'https://explorer.turkdamga.app/tx/';
+  const primaryFile = selectedFiles[0];
+  const result = {
+    fileName: primaryFile.file.name,
+    fileHash: primaryFile.hash,
+    polyTx: fakeTx,
+    polyUrl: `${explorerBase}${fakeTx}`,
+    otsStatus: 'pending',
+    timestamp: now.toISOString(),
+    chain: selectedChain,
+    author: document.getElementById('metaAuthor').value || '—',
+    project: document.getElementById('metaProject').value || '—',
+    desc: document.getElementById('metaDesc').value || '—',
+    vertical: vert || null,
+    verticalLabel: vert ? (VERTICAL_LABELS[vert] || vert) : null,
+    processingPurpose: document.getElementById('metaPurpose').value.trim() || null,
+    dataCategory: cat,
+    retentionUntil: document.getElementById('metaRetention').value || null,
+    consentReference: consent || null,
+    workTitle: document.getElementById('metaWorkTitle').value.trim() || null,
+    id: 'CV-' + Date.now()
+  };
+  currentResult = result;
+  window._lastStampSourceEntries = selectedFiles
+    .filter(e => e.file && e.status === 'ready')
+    .map(e => e.file);
+
+  // Save to history
+  stampHistory.unshift(result);
+  if (stampHistory.length > 100) stampHistory.pop();
+  localStorage.setItem('cv_history', JSON.stringify(stampHistory));
+  updateStats();
+
+  // Show result
+  showResult(result, { fromHistory: false });
+  btn.disabled = false;
+
+  resetStampProgressUI();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function escapeHtmlAttr(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function showResult(r, opts = {}) {
+  const fromHist = opts.fromHistory === true;
+  const card = document.getElementById('resultCard');
+  const details = document.getElementById('resultDetails');
+  const mediaVerticals = ['music', 'visual'];
+  const titleMain = document.getElementById('resultTitleMain');
+  if (titleMain) {
+    titleMain.textContent = (r.vertical && mediaVerticals.includes(r.vertical))
+      ? 'Damgalama başarılı — medya / eser sertifikanız hazır'
+      : 'Damgalama başarılı — sertifikanız hazır';
+  }
+
+  const srcFiles = window._lastStampSourceEntries || [];
+  const dlLabel = srcFiles.length > 1
+    ? `Kaynak dosyaları indir (${srcFiles.length})`
+    : 'Kaynak dosyayı indir';
+  const storageHtml = fromHist
+    ? `<div class="storage-notice storage-notice--muted">
+        <strong>Orijinal dosya bu uygulamada tutulmaz.</strong> Geçmiş kaydı yalnızca hash ve kanıt bilgisidir.
+        Kaynağı damgalama anında kendi bilgisayarınızda veya kurumsal sunucularınızda saklamış olmanız gerekir; bu cihazdan yeniden indirilemez.
+       </div>`
+    : `<div class="storage-notice">
+        <strong>Saklama sizde.</strong> TurkDamga dosya içeriğinizi kalıcı barındırmaz (ayrı nesne-depo sözleşmesi yoksa).
+        Hash ve zincir kanıtı burada; <strong>orijinal belge / görsel / arşiv paketi</strong> kendi diskinizde yedeklenmelidir.
+       </div>
+       ${srcFiles.length ? `<div class="result-dl-row"><button type="button" class="cert-btn" onclick="downloadSourceFiles()">${dlLabel}</button></div>` : ''}`;
+
+  details.innerHTML = `
+    <div class="detail-row">
+      <div class="detail-label">Dosya</div>
+      <div class="detail-value">${r.fileName}</div>
+    </div>
+    ${r.workTitle ? `<div class="detail-row">
+      <div class="detail-label">Eser / ürün adı</div>
+      <div class="detail-value">${escapeHtmlAttr(r.workTitle)}</div>
+    </div>` : ''}
+    <div class="detail-row">
+      <div class="detail-label">SHA-256 Hash</div>
+      <div class="detail-value">${r.fileHash}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Blockchain işlem özeti</div>
+      <div class="detail-value"><a href="${r.polyUrl}" target="_blank" rel="noopener">${r.polyTx.slice(0,20)}…${r.polyTx.slice(-8)} ↗</a></div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Zaman damgası doğrulaması</div>
+      <div class="detail-value" style="color:var(--green2)">⏳ Beklemede — tam onay genelde ~1 saat içinde</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Damgalama Zamanı</div>
+      <div class="detail-value">${new Date(r.timestamp).toLocaleString('tr-TR')}</div>
+    </div>
+    <div class="detail-row">
+      <div class="detail-label">Sertifika ID</div>
+      <div class="detail-value">${r.id}</div>
+    </div>
+    ${r.vertical ? `<div class="detail-row">
+      <div class="detail-label">İçerik türü (KVKK)</div>
+      <div class="detail-value">${escapeHtmlAttr(r.verticalLabel || VERTICAL_LABELS[r.vertical] || r.vertical)} · ${escapeHtmlAttr(r.dataCategory || 'general')}</div>
+    </div>` : ''}
+    ${r.processingPurpose ? `<div class="detail-row">
+      <div class="detail-label">İşleme amacı</div>
+      <div class="detail-value">${escapeHtmlAttr(r.processingPurpose)}</div>
+    </div>` : ''}
+    ${r.retentionUntil ? `<div class="detail-row">
+      <div class="detail-label">Saklama süresi sonu</div>
+      <div class="detail-value">${r.retentionUntil}</div>
+    </div>` : ''}
+    ${r.consentReference ? `<div class="detail-row">
+      <div class="detail-label">Rıza / sözleşme ref.</div>
+      <div class="detail-value">${escapeHtmlAttr(r.consentReference)}</div>
+    </div>` : ''}
+    ${storageHtml}
+  `;
+
+  // QR Code
+  const qrDiv = document.getElementById('qrcode');
+  qrDiv.innerHTML = '';
+  new QRCode(qrDiv, {
+    text: `turkdamga://verify/${r.fileHash}`,
+    width: 100, height: 100,
+    colorDark: '#000000', colorLight: '#ffffff'
+  });
+
+  card.classList.add('show');
+}
+
+// ── Download cert ────────────────────────────────────────────
+function downloadCert() {
+  if (!currentResult) return;
+  const r = currentResult;
+  const mediaVerticals = ['music', 'visual'];
+  const isMediaProfile = r.vertical && mediaVerticals.includes(r.vertical);
+  const certKind = isMediaProfile
+    ? 'DİJİTAL ESER / MEDYA — ZAMAN DAMGASI VE BÜTÜNLÜK SERTİFİKASI'
+    : 'DİJİTAL VARLIK — ZAMAN DAMGASI VE BÜTÜNLÜK SERTİFİKASI';
+  const certNote = isMediaProfile
+    ? 'Bu sertifika; müzik, video, yayın veya benzeri belge dışı dosyanın belirtilen tarihte\nvar olduğunu ve o tarihten bu yana değişmediğini (SHA-256) matematiksel olarak kanıtlar.\nTelif veya dağıtım hukuku ayrı değerlendirme gerektirir.'
+    : 'Bu sertifika; belge veya genel dijital dosyanın belirtilen tarihte var olduğunu ve\no tarihten bu yana değişmediğini matematiksel olarak kanıtlar.';
+
+  const cert = `TURKDAMGA — ${certKind}
+═══════════════════════════════════════════════════════════════
+
+Sertifika ID    : ${r.id}
+Damgalama Zamanı: ${new Date(r.timestamp).toLocaleString('tr-TR')}
+
+VARLIK BİLGİLERİ
+────────────────
+Dosya adı       : ${r.fileName}
+SHA-256 Hash    : ${r.fileHash}
+${r.workTitle ? `Eser / ürün adı : ${r.workTitle}` : 'Eser / ürün adı : —'}
+Yazar / sahip   : ${r.author}
+Proje           : ${r.project}
+Açıklama        : ${r.desc}
+${r.vertical ? `İçerik türü     : ${r.verticalLabel || r.vertical} (${r.dataCategory || ''})` : ''}
+${r.processingPurpose ? `İşleme amacı    : ${r.processingPurpose}` : ''}
+${r.retentionUntil ? `Saklama sonu    : ${r.retentionUntil}` : ''}
+${r.consentReference ? `Rıza/sözleşme   : ${r.consentReference}` : ''}
+
+BLOCKCHAIN KAYITLARI
+────────────────────
+İşlem özeti     : ${r.polyTx}
+Doğrulama URL   : ${r.polyUrl}
+Zaman damgası   : ${r.otsStatus === 'pending' ? 'Beklemede' : 'Onaylandı'}
+
+DOĞRULAMA
+─────────
+${certNote}
+
+SAKLAMA VE SÖZLEŞME NOTU
+────────────────────────
+Orijinal dijital dosyanın asıl nüshasının saklanması ve yedeklenmesi tamamen müşteri /
+dosya sahibinin sorumluluğundadır. TurkDamga yalnızca hash ve kanıt çıktıları üretir;
+ayrı sözleşmede tanımlanmadıkça dosya içeriğini kalıcı müşteri deposu olarak taahhüt etmez.
+Hizmet veya abonelik sözleşmesinde bu saklama koşullarının kullanıcıya ait olduğu açıkça
+belirtilmelidir. Örnek madde: docs/Kullanici-Saklama-Yukumlulugu.md
+${r.vertical === 'health_archive' ? `
+SAĞLIK / ADLİ DOSYA UYARISI
+────────────────────────────
+Hastane adli dosya veya hasta arşivi bağlamında bu damga yalnızca dijital bütünlük ve
+zaman kanıtı sağlar; asıl tıbbi veya idari evrakın yasal sürelerde muhafazası kuruma
+aittir ve damgalama bu yükümlülüğün yerine geçmez. KVKK ve sözleşmelerde bu sınır
+özellikle vurgulanmalıdır (docs/KVKK-Vertical-Damgalama.md §2.4.1; §2.1 madde taslağı:
+docs/Kullanici-Saklama-Yukumlulugu.md).
+` : ''}
+Doğrulama URL   : https://turkdamga.app/verify/${r.fileHash}
+
+─────────────────────────────────────────────────────────────
+SHA-256 · RFC 3161 · TurkDamga Blockchain
+`;
+  const blob = new Blob([cert], { type: 'text/plain;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `TurkDamga-${r.id}.txt`;
+  a.click();
+}
+
+async function downloadSourceFiles() {
+  const files = window._lastStampSourceEntries || [];
+  if (!files.length) {
+    alert('Kaynak dosya bu oturumda bulunamadı. Sayfayı yenilediyseniz dosyayı yeniden seçip damgalamanız gerekir.');
+    return;
+  }
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name;
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    await sleep(400);
+  }
+}
+
+// ── History ───────────────────────────────────────────────────
+function renderHistory() {
+  const grid = document.getElementById('historyGrid');
+  if (stampHistory.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div class="empty-icon">⧗</div><p>Henüz damgalama yapılmadı.<br>İlk damgalamanızı gerçekleştirin.</p></div>`;
+    return;
+  }
+  grid.innerHTML = stampHistory.map(r => `
+    <div class="history-card" onclick="showHistoryDetail('${r.id}')">
+      <div class="hist-icon">${getFileIcon(r.fileName)}</div>
+      <div>
+        <div class="hist-name">${r.fileName}</div>
+        <div class="hist-hash">${r.fileHash.slice(0,32)}…</div>
+        <div class="hist-meta">${new Date(r.timestamp).toLocaleString('tr-TR')} · ${r.author !== '—' ? r.author : 'Anonim'}</div>
+        ${r.vertical ? `<span class="hist-vertical">${escapeHtmlAttr(r.verticalLabel || VERTICAL_LABELS[r.vertical] || r.vertical)}</span>` : ''}
+      </div>
+      <div class="hist-chains">
+        <span class="hist-chain confirmed">Blockchain ✓</span>
+        <span class="hist-chain pending">Damga doğrulaması ⏳</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showHistoryDetail(id) {
+  const r = stampHistory.find(h => h.id === id);
+  if (!r) return;
+  currentResult = r;
+  switchTab('stamp', document.querySelectorAll('.nav-btn')[0]);
+  document.getElementById('stampProgress').classList.remove('show');
+  showResult(r, { fromHistory: true });
+  window.scrollTo({ top: document.getElementById('resultCard').offsetTop - 80, behavior: 'smooth' });
+}
+
+// ── Stats ─────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-total').textContent = stampHistory.length;
+  document.getElementById('stat-chain').textContent = stampHistory.length;
+  document.getElementById('stat-pending').textContent = stampHistory.filter(h => h.otsStatus !== 'confirmed').length;
+}
+
+// ── Verify ────────────────────────────────────────────────────
+async function hashVerifyFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const hash = await hashFile(file);
+  document.getElementById('verifyHashInput').value = hash;
+}
+
+function verifyHash() {
+  const hash = document.getElementById('verifyHashInput').value.trim().toLowerCase();
+  const result = document.getElementById('verifyResult');
+  const icon = document.getElementById('verifyIcon');
+  const msg = document.getElementById('verifyMsg');
+  const detail = document.getElementById('verifyDetail');
+
+  if (!hash || hash.length !== 64) {
+    alert('Geçerli bir SHA-256 hash girin (64 karakter).');
+    return;
+  }
+
+  const found = stampHistory.find(h => h.fileHash === hash);
+  result.classList.add('show');
+
+  if (found) {
+    result.className = 'verify-result show found';
+    icon.textContent = '✦';
+    msg.textContent = 'Doğrulandı — Kayıt Bulundu';
+    detail.innerHTML = `<strong>${found.fileName}</strong> &mdash; ${new Date(found.timestamp).toLocaleString('tr-TR')}<br>İşlem: ${found.polyTx.slice(0,20)}…`;
+  } else {
+    result.className = 'verify-result show notfound';
+    icon.textContent = '✗';
+    msg.textContent = 'Bu arşivde kayıt bulunamadı';
+    detail.textContent = 'Farklı bir hash deneyin veya dosyayı bu sistemde damgaladığınızdan emin olun.';
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────
+updateStats();
+updateKvkkWarnings();
+</script>
+<script src="turkdamga-site-nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Ortam ve sırlar
+.env
+.env.*
+!.env.example
+infra/.env
+backend/.env
+
+# TLS / anahtarlar
+*.pem
+*.key
+*.crt
+*.p12
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+
+# IDE / OS
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store

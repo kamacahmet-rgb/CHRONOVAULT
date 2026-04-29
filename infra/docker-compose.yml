@@ -1,0 +1,57 @@
+# TurkDamga — yerel / sunucu veri katmanı
+# Kullanım: cd infra && copy .env.example .env  (Windows) veya cp .env.example .env
+#           docker compose up -d
+#
+# Ağ: yalnızca iç ağ; API konteyneri eklendiğinde aynı `turkdamga_net` ağına bağlanın.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: cv-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-turkdamga}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD set edin}
+      POSTGRES_DB: ${POSTGRES_DB:-turkdamga}
+    volumes:
+      - cv_pgdata:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - turkdamga_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: cv-redis
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD set edin}
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD set edin}
+    volumes:
+      - cv_redisdata:/data
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - turkdamga_net
+
+volumes:
+  cv_pgdata:
+  cv_redisdata:
+
+networks:
+  turkdamga_net:
+    name: turkdamga_net
+    driver: bridge

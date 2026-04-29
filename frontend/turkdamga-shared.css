@@ -1,0 +1,254 @@
+/**
+ * TurkDamga — tüm sayfalar için landing ile uyumlu temel:
+ * renk değişkenleri, ızgara zemin, üst site navigasyonu.
+ */
+:root {
+  --white: #ffffff;
+  --off-white: #f8faf7;
+  --surface: #f2f7f2;
+  --surface2: #e8f0e8;
+  --green: #1a6b3c;
+  --green2: #237a47;
+  --green-light: #2e9d5a;
+  --green-pale: #e8f5ed;
+  --green-pale2: #d4edd9;
+  --mint: #96d4a8;
+  --text: #1a2b1f;
+  --text2: #3d5445;
+  --text3: #6b8575;
+  --border: #d4e4d8;
+  --border2: #b8d4be;
+  --black: #0a1a0f;
+  --red: #c0392b;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body.cv-base {
+  margin: 0;
+  background: var(--white);
+  color: var(--text);
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-weight: 400;
+  overflow-x: hidden;
+}
+
+body.cv-base::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+body.cv-base.cv-fixed-nav {
+  padding-top: 64px;
+}
+
+.cv-site-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 clamp(16px, 4vw, 40px);
+}
+
+.cv-site-nav-inner {
+  max-width: 1160px;
+  margin: 0 auto;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cv-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.cv-logo-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(26, 107, 60, 0.3);
+}
+
+.cv-logo-text {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 1.2rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.cv-logo-text span {
+  color: var(--green);
+}
+
+.cv-nav-cluster {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex: 1;
+  min-width: 0;
+}
+
+.cv-lang-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.cv-lang-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.cv-lang-btn.active {
+  background: white;
+  color: var(--green);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.cv-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.cv-nav-link {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cv-nav-link:hover {
+  color: var(--green);
+  background: var(--green-pale);
+}
+
+.cv-nav-link.is-current {
+  color: var(--green);
+  background: var(--green-pale);
+}
+
+span.cv-nav-link.is-current {
+  cursor: default;
+}
+
+.cv-nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.cv-nav-signin {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.84rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.cv-nav-signin:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.cv-nav-cta {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--green), var(--green-light));
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 9px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(26, 107, 60, 0.25);
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.cv-nav-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(26, 107, 60, 0.35);
+}
+
+@media (max-width: 960px) {
+  .cv-nav-cluster {
+    max-width: 100%;
+    justify-content: flex-start;
+  }
+
+  .cv-site-nav-inner {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 64px;
+    padding: 10px 0;
+    gap: 10px;
+  }
+}
+
+.cv-z-main {
+  position: relative;
+  z-index: 1;
+}

@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TurkDamga — Görsel Damgalama & Arama</title>
+<link rel="stylesheet" href="turkdamga-shared.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --exact:      #1A6B3C;
+  --similar:    #1A5C8C;
+  --motif:      #7B3FA0;
+  --exact-bg:   #E8F5ED;
+  --similar-bg: #E8F0F8;
+  --motif-bg:   #F3EBF8;
+  --orange:     #C87020;
+  --red:        #B03020;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body.cv-page{
+  background:var(--off-white);color:var(--text);
+  font-family:'DM Sans',sans-serif;min-height:100vh;
+}
+
+/* ── Header (altında site nav 64px) ── */
+header{
+  position:sticky;top:64px;z-index:100;
+  background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:0 32px;
+}
+.header-inner{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;height:60px;
+}
+.header-page-title{
+  font-family:'DM Serif Display',serif;font-size:1rem;font-weight:500;
+  color:var(--text2);letter-spacing:-0.02em;
+}
+.header-tabs{display:flex;gap:4px}
+.htab{
+  background:none;border:none;color:var(--text3);
+  font-family:'DM Sans';font-size:0.82rem;font-weight:500;
+  padding:8px 16px;cursor:pointer;border-radius:6px;transition:all 0.2s;
+}
+.htab:hover{color:var(--green);background:var(--green-pale)}
+.htab.active{color:var(--green);background:var(--green-pale);font-weight:600}
+
+/* ── Layout ── */
+.main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px}
+.page{display:none}.page.active{display:block}
+
+/* ── Upload Zone ── */
+.upload-area{
+  border:2px dashed var(--border2);border-radius:16px;
+  background:white;padding:60px 40px;text-align:center;
+  cursor:pointer;transition:all 0.3s;position:relative;overflow:hidden;
+}
+.upload-area:hover,.upload-area.dragover{
+  border-color:var(--green);background:var(--green-pale);
+}
+.upload-area.has-file{border-style:solid;border-color:var(--green)}
+.upload-icon{font-size:3rem;margin-bottom:16px;display:block}
+.upload-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--text);margin-bottom:8px}
+.upload-sub{font-size:0.88rem;color:var(--text3);margin-bottom:16px}
+.upload-formats{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+.fmt-tag{
+  font-size:0.68rem;font-weight:600;color:var(--text3);
+  background:var(--surface);border:1px solid var(--border);
+  padding:3px 10px;border-radius:4px;
+}
+
+/* Preview */
+.preview-box{
+  display:none;background:white;border:1px solid var(--border);
+  border-radius:12px;padding:20px;margin-top:16px;
+  flex-direction:row;gap:20px;align-items:flex-start;
+}
+.preview-box.show{display:flex}
+.preview-img{
+  width:120px;height:120px;object-fit:cover;
+  border-radius:8px;border:1px solid var(--border);flex-shrink:0;
+}
+.preview-info{flex:1}
+.preview-name{font-weight:600;color:var(--text);margin-bottom:4px}
+.preview-meta{font-size:0.82rem;color:var(--text3);margin-bottom:12px}
+.preview-hashes{display:flex;flex-direction:column;gap:6px}
+.hash-row{display:flex;align-items:center;gap:8px}
+.hash-label{
+  font-size:0.65rem;font-weight:700;text-transform:uppercase;
+  letter-spacing:0.1em;padding:2px 8px;border-radius:4px;
+  min-width:56px;text-align:center;
+}
+.hash-label.sha{background:#FEF3C7;color:#92400E}
+.hash-label.ph{background:#DBEAFE;color:#1E40AF}
+.hash-label.clip{background:#F3E8FF;color:#6B21A8}
+.hash-val{
+  font-family:'IBM Plex Mono';font-size:0.7rem;color:var(--text2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:340px;
+}
+.hash-status{font-size:0.72rem}
+.hash-status.computing{color:var(--orange)}
+.hash-status.done{color:var(--green)}
+
+/* ── Form ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:0.72rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)}
+input,textarea,select{
+  background:white;border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-family:'DM Sans';font-size:0.9rem;
+  padding:10px 14px;outline:none;transition:border-color 0.2s;
+}
+input:focus,textarea:focus{border-color:var(--green)}
+textarea{resize:vertical;min-height:70px}
+
+/* Scope toggle */
+.scope-toggle{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px}
+.scope-btn{
+  flex:1;background:none;border:none;color:var(--text3);
+  font-family:'DM Sans';font-size:0.78rem;font-weight:500;
+  padding:6px 12px;cursor:pointer;border-radius:6px;transition:all 0.2s;
+}
+.scope-btn.active{background:white;color:var(--green);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+
+/* Chain selector */
+.chain-row{display:flex;gap:8px}
+.chain-opt{
+  flex:1;border:1px solid var(--border);border-radius:8px;padding:12px;
+  cursor:pointer;transition:all 0.2s;background:white;text-align:center;
+}
+.chain-opt:hover{border-color:var(--border2)}
+.chain-opt.selected{border-color:var(--green);background:var(--green-pale)}
+.chain-opt input{display:none}
+.chain-icon{font-size:1.4rem;display:block;margin-bottom:4px}
+.chain-name{font-size:0.82rem;font-weight:600;color:var(--text)}
+.chain-detail{font-size:0.7rem;color:var(--text3);margin-top:2px}
+
+/* ── Action button ── */
+.action-btn{
+  width:100%;background:linear-gradient(135deg,var(--green),var(--green-light));
+  border:none;border-radius:10px;color:white;
+  font-family:'DM Sans';font-size:0.9rem;font-weight:700;
+  padding:14px;cursor:pointer;transition:all 0.25s;
+  box-shadow:0 3px 12px rgba(26,107,60,0.3);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.action-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(26,107,60,0.35)}
+.action-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.action-btn.outline{
+  background:none;border:1px solid var(--border2);color:var(--text);
+  box-shadow:none;
+}
+.action-btn.outline:hover{border-color:var(--green);color:var(--green);background:var(--green-pale)}
+
+/* ── Progress ── */
+.progress-bar-wrap{margin:16px 0}
+.progress-label{font-size:0.8rem;color:var(--text3);margin-bottom:6px;display:flex;justify-content:space-between}
+.progress-bar{height:6px;background:var(--surface);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--mint));border-radius:3px;transition:width 0.4s ease;width:0%}
+
+/* ── Search results ── */
+.results-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);
+}
+.results-title{font-family:'DM Serif Display',serif;font-size:1.4rem;color:var(--text)}
+.results-summary{display:flex;gap:8px;flex-wrap:wrap}
+.res-badge{
+  font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:20px;
+  display:flex;align-items:center;gap:5px;
+}
+.res-badge.exact  {background:var(--exact-bg);color:var(--exact)}
+.res-badge.similar{background:var(--similar-bg);color:var(--similar)}
+.res-badge.motif  {background:var(--motif-bg);color:var(--motif)}
+.res-badge.none   {background:#FEF2F2;color:#991B1B}
+
+.result-card{
+  background:white;border:1px solid var(--border);border-radius:12px;
+  padding:20px;margin-bottom:14px;transition:all 0.2s;
+  display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:start;
+}
+.result-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.06);transform:translateY(-1px)}
+.result-card.exact  {border-left:4px solid var(--exact)}
+.result-card.similar{border-left:4px solid var(--similar)}
+.result-card.motif  {border-left:4px solid var(--motif)}
+
+.result-thumb{
+  width:72px;height:72px;object-fit:cover;
+  border-radius:8px;border:1px solid var(--border);
+  background:var(--surface);display:flex;align-items:center;
+  justify-content:center;font-size:2rem;overflow:hidden;
+}
+.result-thumb img{width:100%;height:100%;object-fit:cover}
+
+.result-info .result-name{font-weight:600;color:var(--text);margin-bottom:4px}
+.result-info .result-meta{font-size:0.8rem;color:var(--text3);margin-bottom:8px}
+.result-info .result-hash{
+  font-family:'IBM Plex Mono';font-size:0.68rem;color:var(--text3);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:400px;
+}
+.result-detail{
+  font-size:0.78rem;color:var(--text2);margin-top:6px;
+  background:var(--surface);border-radius:6px;padding:6px 10px;
+  line-height:1.5;
+}
+
+.result-right{text-align:right;flex-shrink:0}
+.match-type-badge{
+  font-size:0.68rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+  padding:4px 12px;border-radius:20px;display:inline-block;margin-bottom:8px;
+}
+.match-type-badge.exact  {background:var(--exact-bg);color:var(--exact)}
+.match-type-badge.similar{background:var(--similar-bg);color:var(--similar)}
+.match-type-badge.motif  {background:var(--motif-bg);color:var(--motif)}
+
+.score-ring{
+  width:56px;height:56px;position:relative;margin:0 0 8px auto;
+}
+.score-ring svg{transform:rotate(-90deg)}
+.score-ring .bg{fill:none;stroke:var(--border);stroke-width:4}
+.score-ring .fg{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset 0.8s ease}
+.score-ring.exact   .fg{stroke:var(--exact)}
+.score-ring.similar .fg{stroke:var(--similar)}
+.score-ring.motif   .fg{stroke:var(--motif)}
+.score-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:0.72rem;font-weight:700;color:var(--text);
+}
+
+.chain-pills{display:flex;gap:4px;justify-content:flex-end;margin-top:4px}
+.cp{font-size:0.65rem;font-weight:600;padding:2px 7px;border-radius:4px;border:1px solid}
+.cp.chain{color:var(--green);border-color:rgba(26,107,60,0.35);background:var(--green-pale)}
+.cp.pending{color:var(--orange);border-color:rgba(200,112,32,0.3);background:rgba(200,112,32,0.06)}
+
+/* Empty / Not found */
+.empty-state{
+  text-align:center;padding:64px 24px;
+  background:white;border:1px solid var(--border);border-radius:12px;
+}
+.empty-icon{font-size:3.5rem;margin-bottom:12px;display:block}
+.empty-title{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:8px}
+.empty-desc{font-size:0.88rem;color:var(--text3);max-width:400px;margin:0 auto;line-height:1.6}
+
+/* Not found uyarısı */
+.not-found-box{
+  background:#FEF2F2;border:1px solid #FECACA;border-radius:12px;
+  padding:24px;text-align:center;margin-bottom:16px;
+}
+.nf-icon{font-size:2.5rem;margin-bottom:8px;display:block}
+.nf-title{font-family:'DM Serif Display',serif;font-size:1.2rem;color:#991B1B;margin-bottom:4px}
+.nf-desc{font-size:0.85rem;color:#B91C1C}
+
+/* Found box */
+.found-box{
+  background:var(--green-pale);border:1px solid var(--green-pale2);
+  border-radius:12px;padding:16px 20px;
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;
+}
+.found-icon{font-size:1.8rem}
+.found-text .found-title{font-weight:700;color:var(--green);font-size:0.95rem}
+.found-text .found-sub{font-size:0.82rem;color:var(--text2);margin-top:2px}
+
+/* Section label */
+.section-label{
+  font-size:0.7rem;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--green);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.section-label::before{content:'';width:20px;height:2px;background:var(--green)}
+
+/* Card containers */
+.card{
+  background:white;border:1px solid var(--border);border-radius:12px;
+  padding:24px;margin-bottom:20px;
+}
+.card-title{
+  font-family:'DM Serif Display',serif;font-size:1.1rem;
+  color:var(--text);margin-bottom:16px;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--text);color:white;border-radius:10px;
+  padding:12px 20px;font-size:0.85rem;
+  box-shadow:0 8px 24px rgba(0,0,0,0.15);
+  transform:translateY(80px);opacity:0;transition:all 0.3s;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green)}
+.toast.error{background:var(--red)}
+
+/* Spin */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{display:inline-block;animation:spin 1s linear infinite}
+
+/* Responsive */
+@media(max-width:700px){
+  .form-grid{grid-template-columns:1fr}
+  .result-card{grid-template-columns:1fr}
+  .result-right{text-align:left}
+  .preview-box{flex-direction:column}
+  .chain-row{flex-direction:column}
+}
+</style>
+</head>
+<body class="cv-base cv-fixed-nav cv-page">
+
+<nav class="cv-site-nav" aria-label="Site">
+  <div class="cv-site-nav-inner">
+    <a class="cv-nav-logo" href="turkdamga-landing.html">
+      <div class="cv-logo-mark">⧗</div>
+      <div class="cv-logo-text">Chrono<span>Vault</span></div>
+    </a>
+    <div class="cv-nav-cluster">
+      <div class="cv-lang-toggle">
+        <button type="button" class="cv-lang-btn active" onclick="cvSetLang('tr',this)" aria-pressed="true">TR</button>
+        <button type="button" class="cv-lang-btn" onclick="cvSetLang('en',this)" aria-pressed="false">EN</button>
+      </div>
+      <div class="cv-nav-links">
+        <a class="cv-nav-link" href="turkdamga-landing.html#features" data-tr="Özellikler" data-en="Features">Özellikler</a>
+        <a class="cv-nav-link" href="turkdamga-landing.html#how" data-tr="Nasıl Çalışır" data-en="How It Works">Nasıl Çalışır</a>
+        <a class="cv-nav-link" href="turkdamga-landing.html#pricing" data-tr="Fiyatlar" data-en="Pricing">Fiyatlar</a>
+        <a class="cv-nav-link" href="#" data-tr="API Docs" data-en="API Docs">API Docs</a>
+        <a class="cv-nav-link" href="turkdamga-arsiv-ui.html" data-tr="Arşiv" data-en="Archive">Arşiv</a>
+        <a class="cv-nav-link is-current" href="turkdamga-image-verify.html" data-tr="Görsel" data-en="Visual">Görsel</a>
+        <a class="cv-nav-link" href="turkdamga-user-panel.html" data-tr="Panel" data-en="Dashboard">Panel</a>
+      </div>
+      <div class="cv-nav-divider" aria-hidden="true"></div>
+      <a class="cv-nav-signin" href="turkdamga-user-panel.html" data-tr="Giriş Yap" data-en="Sign In">Giriş Yap</a>
+      <a class="cv-nav-cta" href="turkdamga-arsiv-ui.html" data-tr="Ücretsiz Başla" data-en="Get Started Free">Ücretsiz Başla</a>
+    </div>
+  </div>
+</nav>
+
+<header>
+  <div class="header-inner">
+    <div class="header-page-title" data-tr="Görsel damgalama" data-en="Visual stamping">Görsel damgalama</div>
+    <div class="header-tabs">
+      <button class="htab active" onclick="showPage('search',this)">🔍 Sorgula</button>
+      <button class="htab" onclick="showPage('stamp',this)">⧗ Damgala</button>
+      <button class="htab" onclick="showPage('about',this)">ℹ Nasıl Çalışır</button>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- ════════════════ SEARCH PAGE ════════════════ -->
+  <div class="page active" id="page-search">
+
+    <div style="margin-bottom:24px">
+      <div class="section-label">Görsel Sorgulama</div>
+      <h1 style="font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--text);margin-bottom:8px">
+        Bu Tasarım Daha Önce Damgalandı mı?
+      </h1>
+      <p style="color:var(--text3);font-size:0.92rem;line-height:1.7;max-width:560px">
+        Halı, kumaş veya herhangi bir görsel tasarımı yükleyin. Sistem üç katmanlı analiz ile
+        tam kopya, benzer görsel ve aynı motifin farklı versiyonlarını tespit eder.
+      </p>
+    </div>
+
+    <!-- Upload -->
+    <div class="card">
+      <div class="card-title">Sorgulanacak Görseli Yükleyin</div>
+
+      <div class="upload-area" id="searchDropZone"
+           onclick="document.getElementById('searchFileInput').click()">
+        <span class="upload-icon">🔍</span>
+        <div class="upload-title">Görseli Buraya Sürükleyin</div>
+        <div class="upload-sub">veya tıklayarak seçin</div>
+        <div class="upload-formats">
+          <span class="fmt-tag">JPG</span><span class="fmt-tag">PNG</span>
+          <span class="fmt-tag">WEBP</span><span class="fmt-tag">TIFF</span>
+          <span class="fmt-tag">BMP</span>
+        </div>
+      </div>
+      <input type="file" id="searchFileInput" accept="image/*" style="display:none">
+
+      <!-- Preview + hashes -->
+      <div class="preview-box" id="searchPreview">
+        <img class="preview-img" id="searchThumb" src="" alt="">
+        <div class="preview-info">
+          <div class="preview-name" id="searchFileName">—</div>
+          <div class="preview-meta" id="searchFileMeta">—</div>
+          <div class="preview-hashes">
+            <div class="hash-row">
+              <span class="hash-label sha">SHA-256</span>
+              <span class="hash-val" id="hSha">—</span>
+              <span class="hash-status computing" id="hShaStatus">hesaplanıyor…</span>
+            </div>
+            <div class="hash-row">
+              <span class="hash-label ph">pHash</span>
+              <span class="hash-val" id="hPHash">—</span>
+              <span class="hash-status computing" id="hPHashStatus">hesaplanıyor…</span>
+            </div>
+            <div class="hash-row">
+              <span class="hash-label clip">CLIP</span>
+              <span class="hash-val" id="hClip">512 boyutlu vektör</span>
+              <span class="hash-status computing" id="hClipStatus">sunucuda hesaplanır</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scope + Search button -->
+      <div style="display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:0.7rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px">Arama Kapsamı</div>
+          <div class="scope-toggle">
+            <button class="scope-btn active" onclick="setScope('all',this)" data-scope="all">Herkese Açık + Benimkiler</button>
+            <button class="scope-btn" onclick="setScope('public',this)" data-scope="public">Sadece Herkese Açık</button>
+            <button class="scope-btn" onclick="setScope('own',this)" data-scope="own">Sadece Benimkiler</button>
+          </div>
+        </div>
+        <button class="action-btn" id="searchBtn" onclick="doSearch()" style="flex:1;min-width:160px" disabled>
+          <span>🔍</span><span>Ara</span>
+        </button>
+      </div>
+
+      <!-- Progress -->
+      <div id="searchProgress" style="display:none;margin-top:16px">
+        <div class="progress-bar-wrap">
+          <div class="progress-label">
+            <span id="progressLabel">SHA-256 hesaplanıyor…</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text3);display:flex;gap:16px;flex-wrap:wrap">
+          <span id="step1" style="opacity:0.4">⬡ Tam eşleşme</span>
+          <span id="step2" style="opacity:0.4">⬡ Benzer görsel</span>
+          <span id="step3" style="opacity:0.4">⬡ Motif analizi</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="searchResults" style="display:none">
+      <div class="results-header">
+        <div class="results-title" id="resultsTitle">Sonuçlar</div>
+        <div class="results-summary" id="resultsSummary"></div>
+      </div>
+      <div id="resultsList"></div>
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display:none">
+      <span class="empty-icon">🔍</span>
+      <div class="empty-title">Sorgu yapmak için görsel yükleyin</div>
+      <p class="empty-desc">Halı, kumaş, tekstil ya da herhangi bir görsel tasarımı yükleyerek daha önce damgalanıp damgalanmadığını öğrenin.</p>
+    </div>
+  </div>
+
+  <!-- ════════════════ STAMP PAGE ════════════════ -->
+  <div class="page" id="page-stamp">
+
+    <div style="margin-bottom:24px">
+      <div class="section-label">Görsel Damgalama</div>
+      <h1 style="font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--text);margin-bottom:8px">
+        Tasarımınızı Blockchain'e Kaydedin
+      </h1>
+      <p style="color:var(--text3);font-size:0.92rem;line-height:1.7;max-width:560px">
+        Yüklediğiniz görselin SHA-256, pHash ve CLIP vektörü hesaplanarak blockchain'e damgalanır.
+        Böylece aynı veya benzer tasarımlar gelecekte tespit edilebilir.
+      </p>
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.65;max-width:560px;margin-top:12px;padding:12px 14px;background:var(--green-pale);border:1px solid var(--green-pale2);border-radius:10px">
+        <strong>Mimari / inşaat proje dosyası</strong> (DWG, IFC, proje ZIP’i) veya <strong>program çıktısı</strong> (CSV, JSON, derleme paketi vb.) damgalıyorsanız
+        <a href="turkdamga-arsiv-ui.html" style="color:var(--green);font-weight:600">Arşiv damgalama</a> sayfasını kullanın — orada sürükle-bırak alanında ürün türü seçilir ve tüm dosya biçimleri desteklenir.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Görsel Seçin</div>
+      <div class="upload-area" id="stampDropZone"
+           onclick="document.getElementById('stampFileInput').click()">
+        <span class="upload-icon">⧗</span>
+        <div class="upload-title">Görseli Buraya Sürükleyin</div>
+        <div class="upload-sub">veya tıklayarak seçin — Maks 50 MB · render / plaka / foto (CAD’ten PNG/PDF export dahil)</div>
+        <div class="upload-formats">
+          <span class="fmt-tag">JPG</span><span class="fmt-tag">PNG</span>
+          <span class="fmt-tag">WEBP</span><span class="fmt-tag">TIFF</span>
+        </div>
+      </div>
+      <input type="file" id="stampFileInput" accept="image/*" style="display:none">
+
+      <div class="preview-box" id="stampPreview">
+        <img class="preview-img" id="stampThumb" src="" alt="">
+        <div class="preview-info">
+          <div class="preview-name" id="stampFileName">—</div>
+          <div class="preview-meta" id="stampFileMeta">—</div>
+          <div class="preview-hashes">
+            <div class="hash-row">
+              <span class="hash-label sha">SHA-256</span>
+              <span class="hash-val" id="sSha">—</span>
+            </div>
+            <div class="hash-row">
+              <span class="hash-label ph">pHash</span>
+              <span class="hash-val" id="sPHash">—</span>
+            </div>
+            <div class="hash-row">
+              <span class="hash-label clip">CLIP</span>
+              <span class="hash-val">512 boyutlu vektör — sunucuda hesaplanır</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Metadata</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Yazar / Tasarımcı</label>
+          <input type="text" id="stampAuthor" placeholder="Ad Soyad veya marka">
+        </div>
+        <div class="form-group">
+          <label>Etiketler</label>
+          <input type="text" id="stampTags" placeholder="halı, kilim, geometrik (virgülle ayır)">
+        </div>
+        <div class="form-group full">
+          <label>Açıklama</label>
+          <textarea id="stampDesc" placeholder="Tasarım hakkında kısa not…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Görünürlük</label>
+          <select id="stampPublic">
+            <option value="true">Herkese Açık (Aranabilir)</option>
+            <option value="false">Özel (Sadece ben)</option>
+          </select>
+        </div>
+      </div>
+
+      <p style="color:var(--text3);font-size:0.88rem;line-height:1.6;margin-bottom:12px">
+        Görsel damgalama tek bir TurkDamga blockchain katmanında işlenir; ayrı ağ seçimi gerekmez.
+      </p>
+      <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;max-width:560px;margin-bottom:16px;font-size:0.84rem;line-height:1.6;color:var(--text2)">
+        <input type="checkbox" id="stampStorageAck" style="margin-top:4px;flex-shrink:0">
+        <span>Orijinal görselin <strong style="color:var(--text)">kendi ortamlarımda saklanmasından ben sorumluyum</strong>; TurkDamga ayrı depo sözleşmesi olmadıkça dosyamı kalıcı barındırmaz. <strong>Hizmet sözleşmemde saklama koşullarının bana ait olduğu</strong> belirtilmiştir (ör. <code style="color:var(--green);font-size:0.78rem">docs/Kullanici-Saklama-Yukumlulugu.md</code>).</span>
+      </label>
+
+      <button class="action-btn" id="stampBtn" onclick="doStamp()" disabled>
+        <span>⧗</span><span>Blockchain'e Damgala</span>
+      </button>
+
+      <div id="stampResult" style="display:none;margin-top:16px"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════ ABOUT PAGE ════════════════ -->
+  <div class="page" id="page-about">
+    <div style="max-width:700px">
+      <div class="section-label">Teknik Detaylar</div>
+      <h1 style="font-family:'DM Serif Display',serif;font-size:1.8rem;color:var(--text);margin-bottom:24px">
+        Üç Katmanlı Görsel Analiz
+      </h1>
+
+      <div class="card" style="border-left:4px solid #92400E">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="background:#FEF3C7;color:#92400E;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:0.1em">Katman 1</span>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem">SHA-256 Tam Eşleşme</div>
+        </div>
+        <p style="font-size:0.88rem;color:var(--text2);line-height:1.7">
+          Dosyanın her biti aynıysa eşleşir. Birebir aynı dosya, farklı isimle yükleme veya
+          indirip tekrar yükleme durumlarını anında tespit eder. O(log n) hız, B-tree index.
+          <br><br>
+          <strong>Sınır:</strong> Tek piksel değişikliği, JPEG yeniden kaydetme veya yeniden
+          boyutlandırma farklı hash üretir.
+        </p>
+      </div>
+
+      <div class="card" style="border-left:4px solid #1E40AF">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="background:#DBEAFE;color:#1E40AF;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:0.1em">Katman 2</span>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem">pHash — Algısal Hash</div>
+        </div>
+        <p style="font-size:0.88rem;color:var(--text2);line-height:1.7">
+          64-bit perceptual hash. DCT (Discrete Cosine Transform) tabanlıdır. Görsel içeriğin
+          "özünü" yakalar. Yeniden boyutlandırma, hafif renk düzeltmesi, JPEG sıkıştırma,
+          küçük watermark ekleme gibi değişikliklere karşı dayanıklıdır.
+          <br><br>
+          <strong>Eşik:</strong> Hamming mesafesi ≤ 10/64 → benzer (%85+ aynı)
+        </p>
+      </div>
+
+      <div class="card" style="border-left:4px solid #6B21A8">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <span style="background:#F3E8FF;color:#6B21A8;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:0.1em">Katman 3</span>
+          <div style="font-family:'DM Serif Display',serif;font-size:1.1rem">CLIP Embedding — Motif Analizi</div>
+        </div>
+        <p style="font-size:0.88rem;color:var(--text2);line-height:1.7">
+          OpenAI CLIP modeli (ViT-B/32) ile 512 boyutlu görsel vektör. Aynı halı motifinin
+          farklı renk, ölçek veya perspektif versiyonlarını tespit eder. Vektörler
+          PostgreSQL pgvector'de IVFFlat index ile saklanır, cosine similarity ile aranır.
+          <br><br>
+          <strong>Eşik:</strong> Cosine benzerliği ≥ 0.82 → güçlü motif benzerliği
+          <br>
+          <strong>Örnek:</strong> Kırmızı zemin üzerine siyah Kafkas motifi →
+          mavi zemin üzerine beyaz aynı Kafkas motifini bulur.
+        </p>
+      </div>
+
+      <div class="card">
+        <div style="font-family:'DM Serif Display',serif;font-size:1.1rem;margin-bottom:12px">Veritabanı & Index Yapısı</div>
+        <pre style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;font-family:'IBM Plex Mono';font-size:0.75rem;color:var(--text2);overflow-x:auto;line-height:1.6">-- pgvector extension
+CREATE EXTENSION vector;
+
+-- Tablo
+CREATE TABLE image_stamps (
+  sha256      CHAR(64),        -- B-tree index
+  phash_int   BIGINT,          -- bit XOR index
+  embedding   vector(512),     -- IVFFlat index
+  ...
+);
+
+-- SHA-256: B-tree (tam eşleşme, O(log n))
+CREATE INDEX ON image_stamps(sha256);
+
+-- pHash: bit operasyonu için
+CREATE INDEX ON image_stamps(phash_int);
+
+-- CLIP: yakın komşu arama
+CREATE INDEX ON image_stamps
+  USING ivfflat (embedding vector_cosine_ops)
+  WITH (lists = 100);</pre>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──────────────────────────────────────────────────
+const API_BASE = 'https://api.turkdamga.app/api/v1'; // değiştir
+let searchFile = null;
+let stampFile  = null;
+let lastStampPayload = null;
+let selectedScope = 'all';
+let selectedChain = 'blockchain';
+
+// ── Tab switching ─────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.htab').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── Scope ─────────────────────────────────────────────────
+function setScope(scope, btn) {
+  selectedScope = scope;
+  document.querySelectorAll('.scope-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── SHA-256 (client-side) ─────────────────────────────────
+async function sha256File(file) {
+  const buf  = await file.arrayBuffer();
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash))
+    .map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ── pHash (client-side canvas) ───────────────────────────
+async function pHashFile(file) {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      // DCT tabanlı pHash: 32x32'ye küçült, griye çevir, DCT uygula
+      const SIZE = 32;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, SIZE, SIZE);
+      const data = ctx.getImageData(0, 0, SIZE, SIZE).data;
+
+      // Gri ton
+      const gray = [];
+      for (let i = 0; i < SIZE * SIZE; i++) {
+        const r = data[i*4], g = data[i*4+1], b = data[i*4+2];
+        gray.push(0.299*r + 0.587*g + 0.114*b);
+      }
+
+      // Basitleştirilmiş DCT pHash (8x8 blok)
+      const HASH_SIZE = 8;
+      const dct = computeDCT(gray, SIZE, HASH_SIZE);
+      const median = dct.slice().sort((a,b)=>a-b)[Math.floor(dct.length/2)];
+      const bits = dct.map(v => v > median ? 1 : 0);
+      const hex  = [];
+      for (let i = 0; i < bits.length; i += 4) {
+        hex.push(parseInt(bits.slice(i,i+4).join(''), 2).toString(16));
+      }
+      URL.revokeObjectURL(url);
+      resolve(hex.join(''));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve('error'); };
+    img.src = url;
+  });
+}
+
+function computeDCT(gray, srcSize, dstSize) {
+  const result = [];
+  const N = srcSize;
+  for (let u = 0; u < dstSize; u++) {
+    for (let v = 0; v < dstSize; v++) {
+      let sum = 0;
+      for (let x = 0; x < N; x++) {
+        for (let y = 0; y < N; y++) {
+          sum += gray[x * N + y] *
+            Math.cos((2*x+1)*u*Math.PI/(2*N)) *
+            Math.cos((2*y+1)*v*Math.PI/(2*N));
+        }
+      }
+      const cu = u === 0 ? 1/Math.sqrt(2) : 1;
+      const cv = v === 0 ? 1/Math.sqrt(2) : 1;
+      result.push((2/N) * cu * cv * sum);
+    }
+  }
+  return result;
+}
+
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+
+// ── Search file input ─────────────────────────────────────
+const searchDZ = document.getElementById('searchDropZone');
+const searchFI = document.getElementById('searchFileInput');
+
+searchDZ.addEventListener('dragover', e => { e.preventDefault(); searchDZ.classList.add('dragover'); });
+searchDZ.addEventListener('dragleave', () => searchDZ.classList.remove('dragover'));
+searchDZ.addEventListener('drop', e => {
+  e.preventDefault(); searchDZ.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleSearchFile(e.dataTransfer.files[0]);
+});
+searchFI.addEventListener('change', e => { if (e.target.files[0]) handleSearchFile(e.target.files[0]); });
+
+async function handleSearchFile(file) {
+  searchFile = file;
+  searchDZ.classList.add('has-file');
+
+  // Preview
+  const thumb = document.getElementById('searchThumb');
+  thumb.src = URL.createObjectURL(file);
+  document.getElementById('searchPreview').classList.add('show');
+  document.getElementById('searchFileName').textContent = file.name;
+  document.getElementById('searchFileMeta').textContent =
+    `${formatBytes(file.size)} · ${file.type} · ${new Date().toLocaleString('tr-TR')}`;
+
+  // Hashes (client-side)
+  document.getElementById('hShaStatus').className = 'hash-status computing';
+  document.getElementById('hShaStatus').textContent = 'hesaplanıyor…';
+  document.getElementById('hPHashStatus').className = 'hash-status computing';
+  document.getElementById('hPHashStatus').textContent = 'hesaplanıyor…';
+
+  const [sha, ph] = await Promise.all([sha256File(file), pHashFile(file)]);
+
+  document.getElementById('hSha').textContent = sha;
+  document.getElementById('hShaStatus').className = 'hash-status done';
+  document.getElementById('hShaStatus').textContent = '✓';
+
+  document.getElementById('hPHash').textContent = ph;
+  document.getElementById('hPHashStatus').className = 'hash-status done';
+  document.getElementById('hPHashStatus').textContent = '✓';
+
+  document.getElementById('hClipStatus').textContent = 'sunucuda hesaplanır';
+
+  document.getElementById('searchBtn').disabled = false;
+  document.getElementById('searchResults').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'none';
+}
+
+// ── SEARCH ────────────────────────────────────────────────
+async function doSearch() {
+  if (!searchFile) return;
+
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⟳</span><span>Aranıyor…</span>';
+
+  const prog = document.getElementById('searchProgress');
+  prog.style.display = 'block';
+
+  const steps = [
+    { id: 'step1', label: 'SHA-256 tam eşleşme aranıyor…', pct: 20 },
+    { id: 'step2', label: 'pHash benzerlik analizi…',       pct: 55 },
+    { id: 'step3', label: 'CLIP motif analizi…',            pct: 85 },
+  ];
+
+  document.getElementById('searchResults').style.display = 'none';
+
+  // Adım göstergeleri simüle et
+  let stepTimer = 0;
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      setProgress(s.pct, s.label);
+      document.getElementById(s.id).style.opacity = '1';
+      document.getElementById(s.id).textContent = '✓ ' +
+        ['Tam eşleşme','Benzer görsel','Motif analizi'][i];
+    }, stepTimer);
+    stepTimer += 700;
+  });
+
+  try {
+    const formData = new FormData();
+    formData.append('file', searchFile);
+    formData.append('scope', selectedScope);
+
+    const res = await fetch(`${API_BASE}/images/search`, {
+      method: 'POST', body: formData,
+    });
+
+    setProgress(100, 'Tamamlandı');
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Arama başarısız');
+    }
+
+    const data = await res.json();
+    renderResults(data);
+
+  } catch (err) {
+    // Demo modu: gerçek API yoksa demo sonuç göster
+    await sleep(800);
+    setProgress(100, 'Tamamlandı');
+    renderResults(getDemoResults());
+    showToast('Demo modu — API bağlantısı yok', 'error');
+  } finally {
+    setTimeout(() => { prog.style.display = 'none'; }, 600);
+    btn.disabled = false;
+    btn.innerHTML = '<span>🔍</span><span>Ara</span>';
+  }
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = label;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+// ── Render Results ────────────────────────────────────────
+function renderResults(data) {
+  const container = document.getElementById('searchResults');
+  const list = document.getElementById('resultsList');
+  const title = document.getElementById('resultsTitle');
+  const summary = document.getElementById('resultsSummary');
+
+  container.style.display = 'block';
+
+  title.textContent = data.found
+    ? `${data.total_matches} Eşleşme Bulundu`
+    : 'Eşleşme Bulunamadı';
+
+  // Summary badges
+  summary.innerHTML = '';
+  if (data.exact_count)   summary.innerHTML += `<span class="res-badge exact">⬛ ${data.exact_count} Tam Kopya</span>`;
+  if (data.similar_count) summary.innerHTML += `<span class="res-badge similar">◈ ${data.similar_count} Benzer</span>`;
+  if (data.motif_count)   summary.innerHTML += `<span class="res-badge motif">❋ ${data.motif_count} Motif</span>`;
+  if (!data.found)        summary.innerHTML += `<span class="res-badge none">✗ Bulunamadı</span>`;
+
+  list.innerHTML = '';
+
+  if (!data.found) {
+    list.innerHTML = `
+      <div class="not-found-box">
+        <span class="nf-icon">✓</span>
+        <div class="nf-title">Bu Tasarım İçin Kayıt Bulunamadı</div>
+        <p class="nf-desc">
+          Arama kapsamındaki damgalanmış görseller arasında bu tasarıma ait tam eşleşme,
+          benzer görsel veya motif benzerliği tespit edilmedi.
+          Orijinal bir tasarımsa damgalayarak koruma altına alabilirsiniz.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  // Found box
+  list.innerHTML = `
+    <div class="found-box">
+      <span class="found-icon">⚠️</span>
+      <div class="found-text">
+        <div class="found-title">Bu Tasarım veya Benzeri Daha Önce Damgalandı</div>
+        <div class="found-sub">${data.total_matches} kayıt bulundu. Detaylar aşağıda.</div>
+      </div>
+    </div>
+  `;
+
+  data.matches.forEach(m => {
+    const score = Math.round(m.score * 100);
+    const circumference = 2 * Math.PI * 22;
+    const dashOffset = circumference * (1 - m.score);
+
+    const card = document.createElement('div');
+    card.className = `result-card ${m.match_type}`;
+    card.innerHTML = `
+      <div class="result-thumb">
+        <span style="font-size:2rem">${m.match_type === 'exact' ? '📄' : m.match_type === 'similar' ? '🖼' : '🎨'}</span>
+      </div>
+      <div class="result-info">
+        <div class="result-name">${escHtml(m.stamp.file_name)}</div>
+        <div class="result-meta">
+          ${m.stamp.author ? escHtml(m.stamp.author) + ' · ' : ''}
+          ${new Date(m.stamp.created_at).toLocaleDateString('tr-TR')} ·
+          ${m.stamp.width ? m.stamp.width + '×' + m.stamp.height : '—'}
+        </div>
+        <div class="result-hash">${m.stamp.sha256}</div>
+        <div class="result-detail">${escHtml(m.detail)}</div>
+        ${m.stamp.polygon_url ? `<a href="${m.stamp.polygon_url}" target="_blank" rel="noopener"
+          style="font-size:0.75rem;color:var(--green);margin-top:6px;display:inline-block">
+          Blockchain kaydını görüntüle ↗</a>` : ''}
+      </div>
+      <div class="result-right">
+        <span class="match-type-badge ${m.match_type}">
+          ${m.match_type === 'exact' ? 'Tam Kopya' : m.match_type === 'similar' ? 'Benzer' : 'Motif'}
+        </span>
+        <div class="score-ring ${m.match_type}">
+          <svg viewBox="0 0 48 48" width="56" height="56">
+            <circle class="bg" cx="24" cy="24" r="22"/>
+            <circle class="fg" cx="24" cy="24" r="22"
+              stroke-dasharray="${circumference}"
+              stroke-dashoffset="${dashOffset}"/>
+          </svg>
+          <div class="score-text">${score}%</div>
+        </div>
+        <div class="chain-pills">
+          <span class="cp ${m.stamp.polygon_status === 'confirmed' ? 'chain' : 'pending'}">
+            ⛓ ${m.stamp.polygon_status === 'confirmed' ? 'Blockchain ✓' : 'Bekliyor'}
+          </span>
+          <span class="cp ${m.stamp.ots_status === 'confirmed' ? 'chain' : 'pending'}">
+            ⧗ ${m.stamp.ots_status === 'confirmed' ? 'Damga ✓' : 'Bekliyor'}
+          </span>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ── STAMP ─────────────────────────────────────────────────
+const stampDZ = document.getElementById('stampDropZone');
+const stampFI = document.getElementById('stampFileInput');
+
+stampDZ.addEventListener('dragover', e => { e.preventDefault(); stampDZ.classList.add('dragover'); });
+stampDZ.addEventListener('dragleave', () => stampDZ.classList.remove('dragover'));
+stampDZ.addEventListener('drop', e => {
+  e.preventDefault(); stampDZ.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) handleStampFile(e.dataTransfer.files[0]);
+});
+stampFI.addEventListener('change', e => { if (e.target.files[0]) handleStampFile(e.target.files[0]); });
+
+async function handleStampFile(file) {
+  stampFile = file;
+  stampDZ.classList.add('has-file');
+  const thumb = document.getElementById('stampThumb');
+  thumb.src = URL.createObjectURL(file);
+  document.getElementById('stampPreview').classList.add('show');
+  document.getElementById('stampFileName').textContent = file.name;
+  document.getElementById('stampFileMeta').textContent =
+    `${formatBytes(file.size)} · ${file.type}`;
+
+  const [sha, ph] = await Promise.all([sha256File(file), pHashFile(file)]);
+  document.getElementById('sSha').textContent = sha;
+  document.getElementById('sPHash').textContent = ph;
+  document.getElementById('stampBtn').disabled = false;
+}
+
+async function doStamp() {
+  if (!stampFile) return;
+  const ack = document.getElementById('stampStorageAck');
+  if (!ack || !ack.checked) {
+    alert('Devam etmek için saklama koşullarını (orijinal görselin size ait ortamlarda saklanması) onaylamanız gerekir.');
+    return;
+  }
+  const btn = document.getElementById('stampBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spin">⟳</span><span>Damgalanıyor…</span>';
+
+  try {
+    const formData = new FormData();
+    formData.append('file', stampFile);
+    formData.append('author', document.getElementById('stampAuthor').value);
+    formData.append('description', document.getElementById('stampDesc').value);
+    formData.append('tags', document.getElementById('stampTags').value);
+    formData.append('is_public', document.getElementById('stampPublic').value);
+    formData.append('chain', selectedChain);
+
+    const res = await fetch(`${API_BASE}/images/stamp`, {
+      method: 'POST', body: formData,
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('cv_access_token') || ''}` },
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Damgalama başarısız');
+    }
+
+    const data = await res.json();
+    showStampResult(data);
+    showToast('Damgalama başarılı!', 'success');
+
+  } catch (err) {
+    // Demo modu
+    showStampResult({
+      id: 'demo-' + Date.now(),
+      sha256: document.getElementById('sSha').textContent,
+      phash: document.getElementById('sPHash').textContent,
+      polygon_tx: '0x' + Array.from({length:64},()=>Math.floor(Math.random()*16).toString(16)).join(''),
+      polygon_status: 'confirmed',
+      ots_status: 'pending',
+      created_at: new Date().toISOString(),
+      file_name: stampFile.name,
+    });
+    showToast('Demo modu — API bağlantısı yok', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span>⧗</span><span>Blockchain\'e Damgala</span>';
+  }
+}
+
+function showStampResult(data) {
+  lastStampPayload = data;
+  const el = document.getElementById('stampResult');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="background:var(--green-pale);border:1px solid var(--green-pale2);border-radius:12px;padding:20px">
+      <div style="font-weight:700;color:var(--green);margin-bottom:12px;font-size:1rem">✦ Damgalama Başarılı</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[
+          ['Sertifika ID', data.id],
+          ['SHA-256',      data.sha256],
+          ['pHash',        data.phash],
+          ['Blockchain TX', data.polygon_tx ? data.polygon_tx.slice(0,20)+'…' : 'İşleniyor'],
+          ['Zaman damgası', data.ots_status === 'confirmed' ? 'Onaylandı ✓' : '⏳ ~1 saat'],
+          ['Zaman',        new Date(data.created_at).toLocaleString('tr-TR')],
+        ].map(([l,v]) => `
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;
+              color:var(--green);min-width:80px">${l}</span>
+            <span style="font-family:'IBM Plex Mono';font-size:0.72rem;color:var(--text2)">${escHtml(String(v))}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--green-pale2)">
+        <p style="font-size:0.78rem;color:var(--text2);line-height:1.55;margin-bottom:10px">
+          <strong>Orijinal dosya sizde.</strong> TurkDamga hash ve zincir kanıtını işler; görselin yerel kopyasını kendi diskinizde veya sunucularınızda saklamalısınız.
+        </p>
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button type="button" class="action-btn outline" style="padding:10px 16px;font-size:0.82rem" onclick="downloadStampSourceImage()">Görseli indir</button>
+          <button type="button" class="action-btn outline" style="padding:10px 16px;font-size:0.82rem" onclick="downloadImageStampCert()">Sertifika (.txt) indir</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function downloadStampSourceImage() {
+  if (!stampFile) {
+    alert('Bu oturumda görsel dosyası bulunamadı. Sayfayı yenilediyseniz dosyayı yeniden seçin.');
+    return;
+  }
+  const url = URL.createObjectURL(stampFile);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = stampFile.name;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function downloadImageStampCert() {
+  const d = lastStampPayload;
+  if (!d) return;
+  const lines = [
+    'TURKDAMGA — GÖRSEL ZAMAN DAMGASI VE BÜTÜNLÜK ÖZETİ',
+    '═══════════════════════════════════════════════════════',
+    '',
+    'Sertifika ID    : ' + String(d.id),
+    'Zaman           : ' + new Date(d.created_at).toLocaleString('tr-TR'),
+    'Dosya adı       : ' + String(d.file_name || stampFile?.name || '—'),
+    'SHA-256         : ' + String(d.sha256),
+    'pHash           : ' + String(d.phash),
+    'Blockchain TX   : ' + String(d.polygon_tx || '—'),
+    '',
+    'SAKLAMA VE SÖZLEŞME NOTU',
+    '────────────────────────',
+    'Orijinal görsel dosyasının saklanması ve yedeklenmesi tamamen kullanıcı / dosya sahibinin',
+    'sorumluluğundadır. TurkDamga ayrı depo sözleşmesi olmadıkça dosya içeriğini kalıcı müşteri',
+    'deposu olarak taahhüt etmez. Sözleşmede bu saklama koşullarının kullanıcıya ait olduğu',
+    'açıkça belirtilmelidir (docs/Kullanici-Saklama-Yukumlulugu.md).',
+    '',
+    'SHA-256 · TurkDamga',
+  ];
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'TurkDamga-gorsel-' + String(d.id).replace(/[^\w.-]+/g, '_') + '.txt';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ── Demo data ─────────────────────────────────────────────
+function getDemoResults() {
+  return {
+    found: true, total_matches: 3,
+    exact_count: 1, similar_count: 1, motif_count: 1,
+    matches: [
+      {
+        match_type: 'exact', score: 1.0,
+        detail: 'Birebir aynı dosya — SHA-256 tam eşleşme',
+        stamp: {
+          id:'aaa', file_name:'kafkas_motif_v1.png',
+          sha256:'a3f4c2d8e1b97f2c4a8d3e6b1c9f4a2e8d7b3c5e9a1f4d8c0b6e2a9f5c3d7b1',
+          phash:'e8c4a2b1f3d5e7c9', author:'Elif Dokumacı',
+          created_at:'2026-01-15T10:30:00Z', width:2400, height:2400,
+          polygon_tx:'0x3f4a8c2e1b9d7f5a3c6e2b8d4f1a7c9e5b3d6f2a8c4e1b7d3f5a9c2e6b4d8',
+          polygon_url:'https://explorer.turkdamga.app/tx/0x3f4a8c2e',
+          polygon_status:'confirmed', ots_status:'confirmed', is_public:true,
+        }
+      },
+      {
+        match_type: 'similar', score: 0.91,
+        detail: 'Görsel benzerlik — Hamming mesafesi: 6/64 (91% benzer)',
+        stamp: {
+          id:'bbb', file_name:'kafkas_motif_v2_rotated.jpg',
+          sha256:'b4e5d3c9f2a1e8b6d4c2f9a7e5b3d1c8f6a4e2b9d7c5f3a1e9b7d5c3f1a8e6',
+          phash:'e8c4a2b3f3d5e7c8', author:'Elif Dokumacı',
+          created_at:'2026-01-20T14:00:00Z', width:2400, height:2400,
+          polygon_tx:'0x2a3b4c5d6e7f8a9b',
+          polygon_url:'https://explorer.turkdamga.app/tx/0x2a3b4c5d',
+          polygon_status:'confirmed', ots_status:'pending', is_public:true,
+        }
+      },
+      {
+        match_type: 'motif', score: 0.87,
+        detail: 'Motif/desen benzerliği — Cosine: 0.870 (87% benzer) · Farklı renk paleti',
+        stamp: {
+          id:'ccc', file_name:'kilim_geometrik_mavi.png',
+          sha256:'c5f6e4d2b1a9c7e5d3b1f9a7c5e3b1d9f7a5c3e1b9d7f5a3c1e9b7d5f3a1c9',
+          phash:'d7b3a1c5f2e4b8d6', author:'Ahmet Ustası',
+          created_at:'2025-11-08T09:15:00Z', width:3000, height:3000,
+          polygon_tx:'0x1c2d3e4f5a6b7c8d',
+          polygon_url:'https://explorer.turkdamga.app/tx/0x1c2d3e4f',
+          polygon_status:'confirmed', ots_status:'confirmed', is_public:true,
+        }
+      }
+    ],
+    searched_at: new Date().toISOString(),
+  };
+}
+
+// ── Helpers ───────────────────────────────────────────────
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+// İlk yüklemede empty state göster
+document.getElementById('emptyState').style.display = 'block';
+</script>
+<script src="turkdamga-site-nav.js"></script>
+</body>
+</html>

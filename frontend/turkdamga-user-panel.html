@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TurkDamga — Kullanıcı Paneli</title>
+<link rel="stylesheet" href="turkdamga-shared.css">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    min-height: 100vh;
+  }
+  .sidebar {
+    width: 232px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    background: var(--off-white);
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .brand {
+    padding: 0 18px 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .brand-caption {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .brand-note {
+    font-size: 0.8rem;
+    color: var(--text3);
+    line-height: 1.45;
+  }
+  .side-nav { display: flex; flex-direction: column; gap: 4px; padding: 0 10px; flex: 1; }
+  .side-link {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--text2);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid transparent;
+    cursor: pointer;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: all 0.2s;
+  }
+  .side-link:hover, .side-link.active {
+    color: var(--green);
+    background: var(--green-pale);
+    border-color: var(--green-pale2);
+  }
+  .side-foot {
+    padding: 14px 14px 0;
+    border-top: 1px solid var(--border);
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .side-foot a {
+    color: var(--text3);
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .side-foot a:hover { color: var(--green); }
+
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; background: var(--white); }
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(8px);
+  }
+  .topbar h1 {
+    font-family: 'DM Serif Display', serif;
+    font-weight: 400;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+  .user-pill {
+    font-size: 0.82rem;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .badge-live {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--green-pale);
+    color: var(--green);
+    border: 1px solid var(--green-pale2);
+  }
+  .badge-demo { background: #fff8e6; color: #8a6d1a; border-color: #e8d49a; }
+
+  .content { padding: 28px 28px 56px; max-width: 1100px; width: 100%; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+  }
+  .alert.warn {
+    border-color: #c9b27a;
+    background: #fffbeb;
+    color: #5c4a1a;
+  }
+
+  .grid-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .org-line {
+    font-size: 0.84rem;
+    color: var(--text3);
+    margin-bottom: 24px;
+    line-height: 1.55;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  }
+  .stat-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.75rem;
+    color: var(--green);
+    font-weight: 400;
+    line-height: 1.1;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+  }
+  .card-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green);
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  input, select, textarea {
+    width: 100%;
+    background: var(--off-white);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--green2);
+    box-shadow: 0 0 0 3px rgba(26,107,60,0.12);
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .row2 { grid-template-columns: 1fr; } }
+
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border: none;
+    color: white;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--green), var(--green-light));
+    box-shadow: 0 3px 12px rgba(26,107,60,0.28);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(26,107,60,0.32);
+  }
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border2);
+    background: var(--white);
+    color: var(--text);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-pale);
+  }
+  .btn-danger {
+    border-color: rgba(192,57,43,0.35);
+    color: var(--red);
+    background: rgba(192,57,43,0.06);
+  }
+  .btn-danger:hover { background: rgba(192,57,43,0.1); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  th, td { padding: 11px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  th {
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    font-weight: 600;
+  }
+  td { color: var(--text2); }
+  td.mono {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.74rem;
+    word-break: break-all;
+    color: var(--text);
+  }
+  tr:hover td { background: var(--green-pale); }
+
+  .muted { color: var(--text3) !important; }
+  .code-inline { font-family: 'IBM Plex Mono', monospace; font-size: 0.84rem; color: var(--green); font-weight: 500; }
+
+  .tabs-m { display: none; }
+  @media (max-width: 900px) {
+    .sidebar { display: none; }
+    .tabs-m {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--off-white);
+    }
+    .tabs-m .side-link { flex: 1; min-width: 88px; text-align: center; }
+  }
+</style>
+</head>
+<body class="cv-base cv-fixed-nav">
+
+<nav class="cv-site-nav" aria-label="Site">
+  <div class="cv-site-nav-inner">
+    <a class="cv-nav-logo" href="turkdamga-landing.html">
+      <div class="cv-logo-mark">⧗</div>
+      <div class="cv-logo-text">Chrono<span>Vault</span></div>
+    </a>
+    <div class="cv-nav-cluster">
+      <div class="cv-lang-toggle">
+        <button type="button" class="cv-lang-btn active" onclick="cvSetLang('tr',this)" aria-pressed="true">TR</button>
+        <button type="button" class="cv-lang-btn" onclick="cvSetLang('en',this)" aria-pressed="false">EN</button>
+      </div>
+      <div class="cv-nav-links">
+        <a class="cv-nav-link" href="turkdamga-landing.html#features" data-tr="Özellikler" data-en="Features">Özellikler</a>
+        <a class="cv-nav-link" href="turkdamga-landing.html#how" data-tr="Nasıl Çalışır" data-en="How It Works">Nasıl Çalışır</a>
+        <a class="cv-nav-link" href="turkdamga-landing.html#pricing" data-tr="Fiyatlar" data-en="Pricing">Fiyatlar</a>
+        <a class="cv-nav-link" href="#" data-tr="API Docs" data-en="API Docs">API Docs</a>
+        <a class="cv-nav-link" href="turkdamga-arsiv-ui.html" data-tr="Arşiv" data-en="Archive">Arşiv</a>
+        <a class="cv-nav-link" href="turkdamga-image-verify.html" data-tr="Görsel" data-en="Visual">Görsel</a>
+        <span class="cv-nav-link is-current" aria-current="page" data-tr="Panel" data-en="Dashboard">Panel</span>
+      </div>
+      <div class="cv-nav-divider" aria-hidden="true"></div>
+      <a class="cv-nav-signin" href="turkdamga-user-panel.html" data-tr="Giriş Yap" data-en="Sign In">Giriş Yap</a>
+      <a class="cv-nav-cta" href="turkdamga-arsiv-ui.html" data-tr="Ücretsiz Başla" data-en="Get Started Free">Ücretsiz Başla</a>
+    </div>
+  </div>
+</nav>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-caption">Kullanıcı paneli</div>
+      <p class="brand-note">Özet, damgalar, arama ve API bağlantısı — landing ile aynı görsel dil.</p>
+    </div>
+    <nav class="side-nav">
+      <button type="button" class="side-link active" data-panel="overview" onclick="showPanel('overview', this)">Genel bakış</button>
+      <button type="button" class="side-link" data-panel="stamps" onclick="showPanel('stamps', this)">Damgalarım</button>
+      <button type="button" class="side-link" data-panel="search" onclick="showPanel('search', this)">Arama</button>
+      <button type="button" class="side-link" data-panel="account" onclick="showPanel('account', this)">Hesap &amp; bağlantı</button>
+    </nav>
+    <div class="side-foot">
+      <a href="turkdamga-landing.html">← Ana sayfa</a>
+      <a href="turkdamga-arsiv-ui.html">Arşiv arayüzü</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="tabs-m">
+      <button type="button" class="side-link active" data-panel="overview" onclick="showPanel('overview', this)">Özet</button>
+      <button type="button" class="side-link" data-panel="stamps" onclick="showPanel('stamps', this)">Damgalar</button>
+      <button type="button" class="side-link" data-panel="search" onclick="showPanel('search', this)">Arama</button>
+      <button type="button" class="side-link" data-panel="account" onclick="showPanel('account', this)">Ayarlar</button>
+    </div>
+    <header class="topbar">
+      <h1 id="pageTitle">Genel bakış</h1>
+      <div class="user-pill">
+        <span id="connState" class="badge-live">API</span>
+        <span id="userLabel">Misafir</span>
+      </div>
+    </header>
+
+    <div class="content">
+      <div id="globalAlert" class="alert" style="display:none;"></div>
+
+      <!-- Genel bakış -->
+      <section class="panel active" id="panel-overview">
+        <div class="grid-stats">
+          <div class="stat-card">
+            <div class="stat-label">Bu ay kullanılan</div>
+            <div class="stat-value" id="statUsed">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Kota</div>
+            <div class="stat-value" id="statQuota">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Toplam damga (liste)</div>
+            <div class="stat-value" id="statTotal">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Kredi bakiyesi (damga birimi)</div>
+            <div class="stat-value" id="statOrgCredit">—</div>
+          </div>
+        </div>
+        <p id="statOrgLine" class="org-line">Kredi ve Polygon maliyet bilgisi yüklenmedi.</p>
+        <div class="card">
+          <div class="card-title">Hızlı işlemler</div>
+          <p style="color:var(--text2);font-size:0.9rem;margin-bottom:18px;line-height:1.65;">
+            Yeni damgalama ve doğrulama için arşiv arayüzünü kullanın. Bu panelde listeleme, arama, <strong style="color:var(--text);font-weight:600;">ön ödemeli kredi</strong> (Polygon GAS tahmini × çarpan) ve API bağlantısı yönetilir.
+            Damgalanan belge, görsel ve arşiv dosyalarının <strong style="color:var(--text);font-weight:600;">asıl kopyası sizin bilgisayarınızda veya seçtiğiniz sunucularda</strong> kalmalıdır; sözleşmede bu saklama yükümlülüğünün size ait olduğu tanımlanır (<code style="font-size:0.82rem;color:var(--green)">docs/Kullanici-Saklama-Yukumlulugu.md</code>).
+          </p>
+          <div class="btn-row">
+            <a class="btn-primary" href="turkdamga-arsiv-ui.html">Arşive git</a>
+            <button type="button" class="btn-ghost" onclick="showPanel('stamps', document.querySelector('[data-panel=stamps]'))">Damgaları yenile</button>
+            <button type="button" class="btn-ghost" onclick="loadCreditBalance()">Kredi bakiyesini yenile</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Damgalarım -->
+      <section class="panel" id="panel-stamps">
+        <div class="card">
+          <div class="card-title">Son damgalamalar</div>
+          <button type="button" class="btn-primary" onclick="loadStamps()">Listeyi yükle</button>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Dosya</th>
+                <th>Hash (kısa)</th>
+                <th>Blockchain</th>
+                <th>Tarih</th>
+              </tr>
+            </thead>
+            <tbody id="stampsBody">
+              <tr><td colspan="4" class="muted">Veri yüklenmedi. «Listeyi yükle» veya Hesap sekmesinde oturum açın.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Arama -->
+      <section class="panel" id="panel-search">
+        <div class="card">
+          <div class="card-title">Birleşik arama <span style="opacity:0.6;font-weight:400;">GET /api/v1/search/stamps</span></div>
+          <div class="row2">
+            <div>
+              <label>Metin (q)</label>
+              <input type="text" id="sq" placeholder="dosya adı, açıklama…" maxlength="500">
+            </div>
+            <div>
+              <label>SHA-256 (tam)</label>
+              <input type="text" id="shash" placeholder="64 hex" maxlength="64" pattern="[a-fA-F0-9]{64}">
+            </div>
+          </div>
+          <div class="row2">
+            <div>
+              <label>Kapsam (scope)</label>
+              <select id="sscope">
+                <option value="self">self — kendi damgalarım</option>
+                <option value="by_verified_subject">by_verified_subject — KYC parmak izi</option>
+              </select>
+            </div>
+            <div>
+              <label>Sayfa başına</label>
+              <input type="number" id="sper" value="20" min="1" max="100">
+            </div>
+          </div>
+          <button type="button" class="btn-primary" onclick="runSearch()">Ara</button>
+        </div>
+        <div class="card" style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Dosya</th>
+                <th>Hash</th>
+                <th>Durum</th>
+                <th>Tarih</th>
+              </tr>
+            </thead>
+            <tbody id="searchBody">
+              <tr><td colspan="4" class="muted">Arama sonucu burada görünür.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Hesap -->
+      <section class="panel" id="panel-account">
+        <div class="card">
+          <div class="card-title">API bağlantısı</div>
+          <label>API kökü</label>
+          <input type="url" id="apiBase" placeholder="https://api.turkdamga.app/api/v1">
+          <label>Erişim token (JWT)</label>
+          <textarea id="accessToken" rows="3" placeholder="Bearer token — tarayıcıda yalnızca yerel test için saklanır"></textarea>
+          <div class="btn-row">
+            <button type="button" class="btn-primary" onclick="saveConn()">Kaydet</button>
+            <button type="button" class="btn-ghost" onclick="clearConn()">Temizle</button>
+            <button type="button" class="btn-ghost" onclick="demoConn()">Demo token (yerel)</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Oturum</div>
+          <p style="color:var(--text2);font-size:0.88rem;margin-bottom:14px;line-height:1.55;">
+            Üretimde giriş <span class="code-inline">POST /auth/login</span> ile yapılır; burada token yapıştırmanız yeterlidir.
+          </p>
+          <button type="button" class="btn-primary" onclick="fetchMe()">Profili doğrula (/auth/me)</button>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const LS_BASE = 'cv_api_base';
+const LS_TOKEN = 'cv_access_token';
+
+const DEMO_STAMPS = {
+  total: 3,
+  page: 1,
+  per_page: 20,
+  items: [
+    { id: '01900001-0000-4000-8000-000000000001', file_name: 'sozlesme.pdf', file_hash: 'a'.repeat(64), file_size: 124000, polygon_status: 'confirmed', ots_status: 'submitted', created_at: new Date().toISOString() },
+    { id: '01900001-0000-4000-8000-000000000002', file_name: 'ek-1.tiff', file_hash: 'b'.repeat(64), file_size: 8900000, polygon_status: 'pending', ots_status: 'pending', created_at: new Date().toISOString() },
+    { id: '01900001-0000-4000-8000-000000000003', file_name: 'foto.jpg', file_hash: 'c'.repeat(64), file_size: 2100000, polygon_status: 'confirmed', ots_status: 'confirmed', created_at: new Date().toISOString() },
+  ],
+};
+
+function apiBase() {
+  return (localStorage.getItem(LS_BASE) || 'https://api.turkdamga.app/api/v1').replace(/\/$/, '');
+}
+function accessToken() {
+  return localStorage.getItem(LS_TOKEN) || '';
+}
+
+function showAlert(msg, isWarn) {
+  const el = document.getElementById('globalAlert');
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.classList.toggle('warn', !!isWarn);
+}
+function hideAlert() {
+  const el = document.getElementById('globalAlert');
+  el.style.display = 'none';
+}
+
+async function apiFetch(path, opts = {}) {
+  const url = apiBase() + path;
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+  const t = accessToken();
+  if (t) headers['Authorization'] = 'Bearer ' + t;
+  return fetch(url, Object.assign({}, opts, { headers }));
+}
+
+function showPanel(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  document.querySelectorAll('.side-link').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const titles = { overview: 'Genel bakış', stamps: 'Damgalarım', search: 'Arama', account: 'Hesap & bağlantı' };
+  document.getElementById('pageTitle').textContent = titles[name] || name;
+  if (name === 'overview') {
+    loadCreditBalance();
+    loadStampTotalOnly();
+  }
+  if (name === 'stamps') loadStamps();
+}
+
+function updateConnUI() {
+  const demo = !accessToken() || accessToken().startsWith('demo_');
+  document.getElementById('connState').textContent = demo ? 'Örnek' : 'API';
+  document.getElementById('connState').classList.toggle('badge-demo', demo);
+}
+
+function saveConn() {
+  localStorage.setItem(LS_BASE, document.getElementById('apiBase').value.trim() || apiBase());
+  localStorage.setItem(LS_TOKEN, document.getElementById('accessToken').value.trim());
+  updateConnUI();
+  hideAlert();
+  showAlert('Bağlantı bilgileri tarayıcıda (localStorage) saklandı. Paylaşımlı cihazlarda dikkat.', true);
+}
+
+function clearConn() {
+  localStorage.removeItem(LS_TOKEN);
+  document.getElementById('accessToken').value = '';
+  updateConnUI();
+  document.getElementById('userLabel').textContent = 'Misafir';
+}
+
+function demoConn() {
+  document.getElementById('accessToken').value = 'demo_local_panel_token';
+  saveConn();
+}
+
+function chainStatusLabel(poly, ots) {
+  const p = (poly || '').toLowerCase();
+  const o = (ots || '').toLowerCase();
+  if (p === 'confirmed' && (o === 'confirmed' || o === 'submitted')) return 'Tam onaylı';
+  if (p === 'confirmed') return 'Zincirde onaylı';
+  if (p === 'pending' || p === 'submitted') return 'İşleniyor';
+  return poly || '—';
+}
+
+function shortHash(h) {
+  if (!h || h.length < 16) return h || '—';
+  return h.slice(0, 10) + '…' + h.slice(-6);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleString('tr-TR'); } catch (_) { return iso; }
+}
+
+function renderStampRows(items, tbodyId) {
+  const tb = document.getElementById(tbodyId);
+  if (!items || !items.length) {
+    tb.innerHTML = '<tr><td colspan="4" class="muted">Kayıt yok.</td></tr>';
+    return;
+  }
+  tb.innerHTML = items.map(it => `
+    <tr>
+      <td>${escapeHtml(it.file_name || '—')}</td>
+      <td class="mono" title="${escapeHtml(it.file_hash || '')}">${shortHash(it.file_hash)}</td>
+      <td>${escapeHtml(chainStatusLabel(it.polygon_status, it.ots_status))}</td>
+      <td>${fmtDate(it.created_at)}</td>
+    </tr>
+  `).join('');
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+async function loadStamps() {
+  hideAlert();
+  const useDemo = !accessToken() || accessToken().startsWith('demo_');
+  if (useDemo) {
+    renderStampRows(DEMO_STAMPS.items, 'stampsBody');
+    document.getElementById('statUsed').textContent = String(DEMO_STAMPS.items.length);
+    document.getElementById('statQuota').textContent = '100';
+    document.getElementById('statTotal').textContent = String(DEMO_STAMPS.total);
+    document.getElementById('statOrgCredit').textContent = '10.000';
+    document.getElementById('statOrgLine').textContent =
+      'Örnek: bir damga 10 kredi (1¢ GAS × 10 çarpan). «Profili doğrula» ile API’den güncel değerler.';
+    showAlert('Demo modu: gerçek API token yoksa örnek liste gösterilir.', true);
+    return;
+  }
+  try {
+    const r = await apiFetch('/stamps?page=1&per_page=50');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const items = data.items || [];
+    renderStampRows(items, 'stampsBody');
+    document.getElementById('statTotal').textContent = String(data.total ?? items.length);
+    document.getElementById('statUsed').textContent = '—';
+    document.getElementById('statQuota').textContent = '—';
+  } catch (e) {
+    renderStampRows(DEMO_STAMPS.items, 'stampsBody');
+    document.getElementById('statTotal').textContent = String(DEMO_STAMPS.total);
+    showAlert('API erişilemedi — örnek veri: ' + (e && e.message ? e.message : e), true);
+  }
+}
+
+function fmtIntTr(n) {
+  try { return Number(n).toLocaleString('tr-TR'); } catch (_) { return String(n); }
+}
+
+async function loadCreditBalance() {
+  const useDemo = !accessToken() || accessToken().startsWith('demo_');
+  if (useDemo) {
+    document.getElementById('statOrgCredit').textContent = '10.000';
+    document.getElementById('statOrgLine').textContent =
+      'Örnek: bir damga 10 kredi (1¢ GAS × 10). «Profili doğrula» ile API’den güncel bakiye.';
+    return;
+  }
+  const lineEl = document.getElementById('statOrgLine');
+  const base = (lineEl.textContent || '').trim();
+  try {
+    const r = await apiFetch('/b2b/credits/balance/me');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if (data.has_organization) {
+      const orgBit =
+        'Kurum (toptan) kredisi: ' +
+        fmtIntTr(data.balance) +
+        ' · org ' +
+        String(data.organization_id || '');
+      lineEl.textContent = base ? base + ' · ' + orgBit : orgBit;
+    }
+  } catch (_) {
+    /* B2B uçları yoksa sessiz; hesap kredisi /auth/me ile gelir */
+  }
+}
+
+async function loadStampTotalOnly() {
+  const useDemo = !accessToken() || accessToken().startsWith('demo_');
+  if (useDemo) {
+    document.getElementById('statTotal').textContent = String(DEMO_STAMPS.total);
+    return;
+  }
+  try {
+    const r = await apiFetch('/stamps?page=1&per_page=1');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    document.getElementById('statTotal').textContent = String(data.total ?? (data.items || []).length);
+  } catch (_) {
+    /* overview: sessiz */
+  }
+}
+
+async function runSearch() {
+  const q = document.getElementById('sq').value.trim();
+  const hash = document.getElementById('shash').value.trim();
+  const scope = document.getElementById('sscope').value;
+  const per = document.getElementById('sper').value || '20';
+  const params = new URLSearchParams({ page: '1', per_page: per, scope });
+  if (q) params.set('q', q);
+  if (hash.length === 64) params.set('file_hash', hash.toLowerCase());
+
+  const useDemo = !accessToken() || accessToken().startsWith('demo_');
+  if (useDemo) {
+    const filtered = DEMO_STAMPS.items.filter(it => {
+      if (hash.length === 64 && it.file_hash.toLowerCase() !== hash.toLowerCase()) return false;
+      if (q && !(it.file_name || '').toLowerCase().includes(q.toLowerCase())) return false;
+      return true;
+    });
+    renderStampRows(filtered, 'searchBody');
+    showAlert('Demo modu: arama yalnızca örnek veri üzerinde.', true);
+    return;
+  }
+  try {
+    const r = await apiFetch('/search/stamps?' + params.toString());
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    renderStampRows(data.items || [], 'searchBody');
+    hideAlert();
+  } catch (e) {
+    showAlert('Arama başarısız: ' + (e && e.message ? e.message : e), true);
+  }
+}
+
+async function fetchMe() {
+  hideAlert();
+  const useDemo = !accessToken() || accessToken().startsWith('demo_');
+  if (useDemo) {
+    document.getElementById('userLabel').textContent = 'Demo kullanıcı';
+    showAlert('Demo token ile profil doğrulanmaz.', true);
+    return;
+  }
+  try {
+    const r = await apiFetch('/auth/me');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const u = await r.json();
+    document.getElementById('userLabel').textContent = u.username || u.email || 'Kullanıcı';
+    if (typeof u.used_this_month === 'number' && typeof u.monthly_quota === 'number') {
+      document.getElementById('statUsed').textContent = String(u.used_this_month);
+      document.getElementById('statQuota').textContent = String(u.monthly_quota);
+    }
+    if (typeof u.credit_balance === 'number') {
+      document.getElementById('statOrgCredit').textContent = fmtIntTr(u.credit_balance);
+    }
+    const parts = [];
+    if (typeof u.stamp_credit_cost === 'number') {
+      parts.push('Bir damga: ' + fmtIntTr(u.stamp_credit_cost) + ' kredi');
+    }
+    if (typeof u.polygon_gas_cost_cents_estimate === 'number') {
+      const m = typeof u.sale_credit_multiplier === 'number' ? u.sale_credit_multiplier : 10;
+      parts.push('Polygon tahmini ' + String(u.polygon_gas_cost_cents_estimate) + '¢ × ' + String(m) + ' (satış)');
+    }
+    if (parts.length) {
+      document.getElementById('statOrgLine').textContent = parts.join(' · ');
+    }
+    await loadCreditBalance();
+    await loadStampTotalOnly();
+    hideAlert();
+  } catch (e) {
+    showAlert('/auth/me hatası: ' + (e && e.message ? e.message : e), true);
+  }
+}
+
+(function init() {
+  document.getElementById('apiBase').value = localStorage.getItem(LS_BASE) || 'https://api.turkdamga.app/api/v1';
+  document.getElementById('accessToken').value = localStorage.getItem(LS_TOKEN) || '';
+  updateConnUI();
+  loadCreditBalance();
+  loadStampTotalOnly();
+})();
+</script>
+<script src="turkdamga-site-nav.js"></script>
+</body>
+</html>
